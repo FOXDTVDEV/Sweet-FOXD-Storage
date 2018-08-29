@@ -25,10 +25,9 @@
         </activity>
 
         <activity
-            android:name=".activities.DetailsActivity"
+            android:name=".ConsoleActivity"
             android:windowSoftInputMode="adjustResize"
         />
-        <activity android:name=".activities.PublishIPFSContentActivity"/>
 
         <activity android:name=".activities.AddIPFSContentActivity">
             <intent-filter>
@@ -38,7 +37,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.IPFSBrowseActivity">
+        <activity android:name=".activities.BrowseActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 

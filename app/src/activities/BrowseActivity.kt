@@ -1,6 +1,5 @@
 package fr.rhaz.ipfs.sweet.activities
 
-import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
@@ -10,9 +9,8 @@ import android.webkit.WebViewClient
 import fr.rhaz.ipfs.sweet.IPXSResource
 import fr.rhaz.ipfs.sweet.R
 import kotlinx.android.synthetic.main.activity_browse.*
-import net.steamcrafted.loadtoast.LoadToast
 
-class IPFSBrowseActivity : AppCompatActivity() {
+class BrowseActivity : AppCompatActivity() {
 
     private var ipxsResource: IPXSResource? = null
 
@@ -24,8 +22,8 @@ class IPFSBrowseActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        val loadToast = LoadToast(this).show()
-        ipxsResource = IPXSResource(intent.data)
+        /*val loadToast = LoadToast(this).show()
+        ipxs = IPXSResource(intent.data)*/
         webView.loadUrl(ipxsResource!!.toPublic())
         webView.settings.javaScriptEnabled = false
 
@@ -33,7 +31,7 @@ class IPFSBrowseActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
 
-                loadToast.success()
+                //loadToast.success()
             }
         }
 
@@ -48,9 +46,9 @@ class IPFSBrowseActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.publish -> {
-                val intent = Intent(this@IPFSBrowseActivity, PublishIPFSContentActivity::class.java)
+                /*val intent = Intent(this@IPFSBrowseActivity, PublishIPFSContentActivity::class.java)
                 intent.putExtra("HASH", ipxsResource!!.address)
-                startActivity(intent)
+                startActivity(intent)*/
             }
         }
         return super.onOptionsItemSelected(item)

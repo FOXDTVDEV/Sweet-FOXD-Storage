@@ -1,4 +1,4 @@
-package fr.rhaz.ipfs.sweet.activities
+package fr.rhaz.ipfs.sweet
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -6,32 +6,24 @@ import android.content.Intent
 import android.content.Intent.*
 import android.os.Bundle
 import android.support.design.widget.Snackbar
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.text.format.Formatter
 import android.widget.PopupMenu
-import fr.rhaz.ipfs.sweet.App
-import fr.rhaz.ipfs.sweet.IPFSDaemon
-import fr.rhaz.ipfs.sweet.R
-import io.ipfs.kotlin.IPFS
+import fr.rhaz.ipfs.sweet.activities.AddIPFSContentActivity
+import io.ipfs.api.IPFS
 import kotlinx.android.synthetic.main.activity_details.*
-import javax.inject.Inject
 
-class DetailsActivity: AppCompatActivity() {
+class ConsoleActivity: AppCompatActivity() {
 
     val ctx = this as Context
 
-    @Inject
-    lateinit var ipfs: IPFS
-
-    val ipfsd = IPFSDaemon(this)
+    val ipfs = IPFS("/ip4/127.0.0.1/tcp/5001")
 
     override fun onBackPressed() {}
     override fun onResume() = super.onResume()
 
     override fun onCreate(state: Bundle?) = super.onCreate(state).also{
 
-        App.component()?.inject(this)
         setContentView(R.layout.activity_details)
 
         input.setOnEditorActionListener { textview, i, ev ->  true.also {
@@ -98,10 +90,10 @@ class DetailsActivity: AppCompatActivity() {
                     add("Garbage collect").setOnMenuItemClickListener { true.also{
                         Thread {
                             val gc = ipfs.repo.gc()
-                            runOnUiThread {
+                            /*runOnUiThread {
                                 AlertDialog.Builder(ctx)
                                     .setMessage("Collected ${gc.size} objects").show()
-                            }
+                            }*/
                         }.start()
                     }}
 

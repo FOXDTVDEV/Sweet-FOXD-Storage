@@ -4,21 +4,30 @@ import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
 import android.os.Build
-import okio.Okio
+import io.ipfs.api.IPFS
 import java.io.File
+import java.io.FileOutputStream
 
-class IPFSDaemon(val androidContext: Context) {
+val Context.ipfsd
+    get() = Daemon(this)
 
-    val bin by lazy{File(androidContext.filesDir, "ipfsbin")}
-    val store by lazy{File(androidContext.filesDir, ".ipfs_repo")}
-    val version by lazy{File(androidContext.filesDir, ".ipfs_version")}
+val Context.ipfs by lazy{IPFS("/ip4/127.0.0.1/tcp/5001")}
 
-    fun Activity.check(callback: () -> Unit = {}, err: (String) -> Unit = {}){
+class Daemon(val ctx: Context) {
+
+    val bin by lazy{File(ctx.filesDir, "ipfsbin")}
+    val store by lazy{File(ctx.filesDir, ".ipfs_repo")}
+    val version by lazy{File(ctx.filesDir, ".ipfs_version")}
+
+    fun check(callback: () -> Unit = {}, err: (String) -> Unit = {}){
+        if(ctx !is Activity) return;
+
         if(bin.exists()) callback()
         else install(callback, err)
     }
 
-    fun Activity.install(callback: () -> Unit, err: (String) -> Unit = {}) {
+    fun install(callback: () -> Unit, err: (String) -> Unit = {}) {
+        val act = ctx as? Activity ?: return
 
         val type = when {
             Build.CPU_ABI.toLowerCase().startsWith("x86") -> "x86"
@@ -26,23 +35,19 @@ class IPFSDaemon(val androidContext: Context) {
             else -> return err("Unsupported architecture: ${Build.CPU_ABI}")
         }
 
-        val progress = ProgressDialog(androidContext).apply {
+        val progress = ProgressDialog(ctx).apply {
             setMessage("Installing...")
             setCancelable(false)
             show()
         }
 
         Thread {
-            val source = Okio.buffer(Okio.source(assets.open(type)))
-            val sink = Okio.buffer(Okio.sink(bin))
-            while (!source.exhausted()) source.read(sink.buffer(), 1024)
-            source.close()
-            sink.close()
+            act.assets.open(type).copyTo(FileOutputStream(bin))
             bin.setExecutable(true)
-            version.writeText(assets.open("version").reader().readText());
+            version.writeText(act.assets.open("version").reader().readText());
 
             progress.dismiss()
-            runOnUiThread(callback)
+            act.runOnUiThread(callback)
         }.start()
     }
 
@@ -52,9 +57,10 @@ class IPFSDaemon(val androidContext: Context) {
         return Runtime.getRuntime().exec(command, env)
     }
 
-    fun Activity.init(callback: () -> Unit = {}){
+    fun init(callback: () -> Unit = {}){
+        val act = ctx as? Activity ?: return
 
-        val progress = ProgressDialog(androidContext).apply {
+        val progress = ProgressDialog(ctx).apply {
             setMessage("Initializing...")
             setCancelable(false)
             show()
@@ -64,7 +70,7 @@ class IPFSDaemon(val androidContext: Context) {
             val exec = run("init")
             exec.waitFor()
             progress.dismiss()
-            runOnUiThread(callback)
+            act.runOnUiThread(callback)
         }.start()
 
     }

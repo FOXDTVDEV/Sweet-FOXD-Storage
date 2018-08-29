@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "fr.rhaz.ipfs.sweet"
-        minSdkVersion 19
+        minSdkVersion 24
         targetSdkVersion 27
         versionCode 11
         versionName "0.11"
@@ -51,7 +51,6 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 
     implementation "org.ligi:tracedroid:1.4"
-    implementation 'com.github.ligi:ipfs-api-kotlin:0.12'
     implementation 'com.github.kenglxn.QRGen:android:2.4.0'
     implementation 'com.github.ipfs:java-ipfs-api:v1.2.1'
 }

@@ -8,7 +8,6 @@ import android.content.Intent
 import android.os.Binder
 import android.support.v4.app.NotificationCompat
 import fr.rhaz.ipfs.sweet.State.running
-import fr.rhaz.ipfs.sweet.activities.DetailsActivity
 
 class IPFSDaemonService: Service() {
 
@@ -20,9 +19,6 @@ class IPFSDaemonService: Service() {
     val notifs: NotificationManager
         get() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    val ipfsd
-        get() = IPFSDaemon(baseContext)
-
     lateinit var daemon: Process
 
     override fun onCreate() = super.onCreate().also{
@@ -30,8 +26,8 @@ class IPFSDaemonService: Service() {
             action = "STOP"
         }.let { PendingIntent.getService(this, 0, it, 0) }
 
-        val open = Intent(this, DetailsActivity::class.java)
-                .let { PendingIntent.getActivity(this, 0, it, 0) }
+        val open = Intent(this, ConsoleActivity::class.java)
+            .let { PendingIntent.getActivity(this, 0, it, 0) }
 
         val builder = NotificationCompat.Builder(this).setOngoing(true)
                 .setSmallIcon(R.drawable.notification)

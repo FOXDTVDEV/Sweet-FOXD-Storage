@@ -1,40 +1,25 @@
 package fr.rhaz.ipfs.sweet.activities
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
-import fr.rhaz.ipfs.sweet.App
 import fr.rhaz.ipfs.sweet.R
-import io.ipfs.kotlin.IPFS
-import io.ipfs.kotlin.model.NamedHash
+import io.ipfs.api.IPFS
 import kotlinx.android.synthetic.main.activity_add.*
 import net.glxn.qrgen.android.QRCode
-import net.steamcrafted.loadtoast.LoadToast
 import org.ligi.tracedroid.logging.Log
 import java.net.ConnectException
-import javax.inject.Inject
 
-abstract class HashTextAndBarcodeActivity : AppCompatActivity() {
+abstract class ShareActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var ipfs: IPFS
+    val ipfs = IPFS("/ip4/127.0.0.1/tcp/5001")
 
-    var addResult: NamedHash? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        App.component()?.inject(this)
+    override fun onCreate(state: Bundle?) = super.onCreate(state).also {
         setContentView(R.layout.activity_add)
-
         hashInfoText.movementMethod = LinkMovementMethod.getInstance()
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -42,21 +27,14 @@ abstract class HashTextAndBarcodeActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item!!.itemId) {
-            R.id.copy -> {
-                val clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager;
-                val clip = ClipData.newPlainText("hash", addResult?.Hash)
-                clipboardManager.primaryClip = clip
-
-                Snackbar.make(hashInfoText, "copy " + addResult?.Hash, Snackbar.LENGTH_LONG).show()
-                return true
+    override fun onOptionsItemSelected(item: MenuItem?) =
+        super.onOptionsItemSelected(item).also{
+            when (item!!.itemId) {
+                R.id.copy -> {}
             }
         }
-        return super.onOptionsItemSelected(item)
-    }
 
-    fun addWithUI(callback: () -> NamedHash?) {
+    /*fun addWithUI(callback: () -> NamedHash?) {
 
         val show = LoadToast(this).show()
 
@@ -85,8 +63,5 @@ abstract class HashTextAndBarcodeActivity : AppCompatActivity() {
             }
         }).start()
 
-    }
-
-    abstract fun getSuccessDisplayHTML(): String
-    abstract fun getSuccessURL(): String
+    }*/
 }
