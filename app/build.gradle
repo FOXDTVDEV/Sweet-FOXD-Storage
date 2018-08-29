@@ -10,13 +10,34 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        applicationId "org.ligi.ipfsdroid"
-        minSdkVersion 15
+        applicationId "fr.rhaz.ipfs.sweet"
+        minSdkVersion 19
         targetSdkVersion 27
         versionCode 11
         versionName "0.11"
-        archivesBaseName = "IPFSDroid-$versionName"
+        archivesBaseName = "sweetipfs-$versionName"
         vectorDrawables.useSupportLibrary = true
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "$archivesBaseName-${variant.name}.apk"
+        }
+        variant.assemble.doLast { assemble ->
+            copy {
+                from variant.outputs*.outputFile
+                into file("/apk")
+            }
+        }
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
     }
 
     buildTypes {
@@ -26,14 +47,16 @@ android {
         }
     }
 
-    dexOptions {
-        incremental true
-    }
-
     lintOptions {
         // for OKIO
         warning 'InvalidPackage'
     }
+}
+
+repositories {
+    google()
+    jcenter()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -66,9 +89,10 @@ dependencies {
 
     implementation 'com.github.kenglxn.QRGen:android:2.4.0'
 
-    implementation 'com.google.android.gms:play-services-oss-licenses:15.0.0'
+    implementation 'com.google.android.gms:play-services-oss-licenses:16.0.0'
 
     kaptAndroidTest "com.google.dagger:dagger-compiler:$dagger_version"
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 }
 
 kotlin {

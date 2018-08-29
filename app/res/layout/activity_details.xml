@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.MainActivity">
+
+    <TextView
+        android:id="@+id/console"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/transparent"
+        android:focusable="false"
+        android:longClickable="true"
+        android:text="Connected! Type something or navigate the menus"
+        android:textColor="@android:color/black"
+        android:textColorHighlight="@android:color/holo_blue_bright"
+        android:textColorLink="@android:color/holo_blue_light"
+        android:textIsSelectable="true"
+        app:layout_constraintBottom_toTopOf="@+id/input"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/actionbtn" />
+
+
+    <EditText
+        android:id="@+id/input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:inputType="text"
+        android:hint="@string/console_hint"
+        android:backgroundTint="@android:color/holo_blue_bright"
+        android:textCursorDrawable="@drawable/color_cursor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/infobtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/background_light"
+        android:text="@string/menu_info"
+        app:layout_constraintEnd_toStartOf="@+id/configbtn"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/actionbtn" />
+
+
+    <Button
+        android:id="@+id/actionbtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/background_light"
+        android:text="@string/menu_action"
+        app:layout_constraintEnd_toStartOf="@+id/infobtn"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/configbtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/background_light"
+        android:text="@string/menu_config"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/infobtn" />
+
+
+</android.support.constraint.ConstraintLayout>
