@@ -1,4 +1,0 @@
-{
-"type":"android",
-"stages":["lint","test","assemble"]
-}
