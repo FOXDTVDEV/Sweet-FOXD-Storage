@@ -1,58 +1,65 @@
 package fr.rhaz.ipfs.sweet
 
-import android.app.IntentService
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Binder
 import android.support.v4.app.NotificationCompat
 import fr.rhaz.ipfs.sweet.State.running
 import fr.rhaz.ipfs.sweet.activities.DetailsActivity
 
-class IPFSDaemonService : IntentService("IPFSDaemonService") {
+class IPFSDaemonService: Service() {
 
-    private var nManager: NotificationManager? = null
-    private var daemon: Process? = null
-    internal var NOTIFICATION_ID = 12345
+    override fun onBind(i: Intent) =
+        object: Binder() {
+            val service = this@IPFSDaemonService
+        }
 
-    override fun onHandleIntent(intent: Intent) {
-        val exitIntent = Intent(this, IPFSDaemonService::class.java)
-        exitIntent.action = "STOP"
-        val pendingExit = PendingIntent.getService(this, 0, exitIntent, 0)
+    val notifs: NotificationManager
+        get() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val targetIntent = Intent(this, DetailsActivity::class.java)
-        val pIntent = PendingIntent.getActivity(this, 0, targetIntent, 0)
+    val ipfsd
+        get() = IPFSDaemon(baseContext)
+
+    lateinit var daemon: Process
+
+    override fun onCreate() = super.onCreate().also{
+        val exit = Intent(this, IPFSDaemonService::class.java).apply {
+            action = "STOP"
+        }.let { PendingIntent.getService(this, 0, it, 0) }
+
+        val open = Intent(this, DetailsActivity::class.java)
+                .let { PendingIntent.getActivity(this, 0, it, 0) }
+
         val builder = NotificationCompat.Builder(this).setOngoing(true)
                 .setSmallIcon(R.drawable.notification)
                 .setContentTitle("IPFS Daemon")
                 .setContentText("The daemon is running")
-                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "exit", pendingExit)
+                .setContentIntent(open)
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "exit", exit)
 
-        builder.setContentIntent(pIntent)
-        nManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nManager!!.notify(NOTIFICATION_ID, builder.build())
+        notifs.notify(1, builder.build())
 
-        try {
-            daemon = IPFSDaemon(baseContext).run("daemon")
-            running = true
-            daemon!!.waitFor()
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        }
+        Thread{
+            try {
+                daemon = ipfsd.run("daemon")
+                running = true
+                daemon.waitFor()
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+        }.start()
     }
 
-    override fun onDestroy() {
-        daemon!!.destroy()
-        super.onDestroy()
+    override fun onDestroy() = super.onDestroy().also{
+        daemon.destroy()
         running = false
-        nManager?.cancel(NOTIFICATION_ID)
+        notifs.cancel(1)
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        val action = intent.action
-        if(nManager != null && action != null && action == "STOP")
-            stopSelf()
-        return super.onStartCommand(intent, flags, startId)
-    }
+    override fun onStartCommand(i: Intent?, f: Int, id: Int) = super.onStartCommand(i, f, id)
+        .also{ i?.action?.takeIf{it == "STOP"}?.also{stopSelf()} }
 
 }
