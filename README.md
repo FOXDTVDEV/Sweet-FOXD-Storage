@@ -2,20 +2,20 @@
     <img src="https://i.imgur.com/Q7SCim2.png"/>
     <br>
     :earth_africa: Full IPFS node for Android :earth_africa:
-    <br>
-    <br>
-    <img src="https://i.imgur.com/GzlgQdyl.jpg"/>
 </h3>
-
 
 <hr>
 <h3 align="center">
   <a href="#download">Download</a> •
   <a href="#final-features">Features</a> •
-  <a href="#screenshots">Screenshots</a> •
   <a href="#join-us">Join us!</a>
 </h3>
 <hr>
+
+<h2 align="center">
+    <a href="https://i.imgur.com/GzlgQdy.jpg"><img src="https://i.imgur.com/GzlgQdyl.jpg"/></a>
+</h2>
+
 
 ## Download
 
@@ -39,10 +39,6 @@ Minimum Android version: 4.4 (KitKat) (API 19)
 - Install, init, start, daemon as foreground service [finished]
 - Notification [finished]
 - Add API origin [needs design improvements]
-
-## Screenshots
-
-![](https://i.imgur.com/GzlgQdy.jpg)
 
 ## Join us!
 
