@@ -2,20 +2,13 @@ package fr.rhaz.ipfs.sweet.activities
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
 import fr.rhaz.ipfs.sweet.R
-import io.ipfs.api.IPFS
 import kotlinx.android.synthetic.main.activity_add.*
-import net.glxn.qrgen.android.QRCode
-import org.ligi.tracedroid.logging.Log
-import java.net.ConnectException
 
 abstract class ShareActivity : AppCompatActivity() {
-
-    val ipfs = IPFS("/ip4/127.0.0.1/tcp/5001")
 
     override fun onCreate(state: Bundle?) = super.onCreate(state).also {
         setContentView(R.layout.activity_add)

@@ -1,23 +1,28 @@
 package fr.rhaz.ipfs.sweet
 
-import android.app.Activity
-import android.app.ProgressDialog
+import android.R.drawable.*
+import android.app.*
+import android.app.NotificationManager.*
 import android.content.Context
+import android.content.Intent
+import android.graphics.Color
+import android.os.Binder
 import android.os.Build
-import io.ipfs.api.IPFS
+import android.os.Environment
+import android.support.v4.app.NotificationCompat
+import android.support.v4.app.NotificationManagerCompat
+import fr.rhaz.ipfs.sweet.R.drawable.*
 import java.io.File
 import java.io.FileOutputStream
 
 val Context.ipfsd
     get() = Daemon(this)
 
-val Context.ipfs by lazy{IPFS("/ip4/127.0.0.1/tcp/5001")}
-
 class Daemon(val ctx: Context) {
 
-    val bin by lazy{File(ctx.filesDir, "ipfsbin")}
-    val store by lazy{File(ctx.filesDir, ".ipfs_repo")}
-    val version by lazy{File(ctx.filesDir, ".ipfs_version")}
+    val store by lazy{storage[".ipfs"]}
+    val bin by lazy{ctx.filesDir["ipfsbin"]}
+    val version by lazy{ctx.filesDir["version"]}
 
     fun check(callback: () -> Unit = {}, err: (String) -> Unit = {}){
         if(ctx !is Activity) return;
@@ -73,6 +78,61 @@ class Daemon(val ctx: Context) {
             act.runOnUiThread(callback)
         }.start()
 
+    }
+
+}
+
+class DaemonService: Service() {
+
+    override fun onBind(i: Intent) = null
+
+    lateinit var daemon: Process
+
+    override fun onCreate() = super.onCreate().also{
+
+        val exit = Intent(this, DaemonService::class.java).apply {
+            action = "STOP"
+        }.let { PendingIntent.getService(this, 0, it, 0) }
+
+        val open = Intent(this, MainActivity::class.java)
+                .let { PendingIntent.getActivity(this, 0, it, 0) }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            NotificationChannel("sweetipfs", "Sweet IPFS", IMPORTANCE_LOW).apply {
+                description = "Sweet IPFS"
+                getSystemService(NotificationManager::class.java)
+                    .createNotificationChannel(this)
+            }
+
+        NotificationCompat.Builder(this, "sweetipfs").run {
+            setOngoing(true)
+            color = Color.parseColor("#4b9fa2")
+            setSmallIcon(notificon)
+            setShowWhen(false)
+            setContentTitle("IPFS Daemon")
+            setContentText("Your IPFS node is running in foreground")
+            setContentIntent(open)
+            addAction(ic_menu_close_clear_cancel, "exit", exit)
+            build()
+        }.also { startForeground(1, it) }
+
+
+                Thread{
+            try {
+                daemon = ipfsd.run("daemon")
+                daemon.waitFor()
+            } catch (e: InterruptedException) { }
+        }.start()
+    }
+
+    override fun onDestroy() = super.onDestroy().also{
+        daemon.destroy()
+        NotificationManagerCompat.from(this).cancel(1)
+    }
+
+    override fun onStartCommand(i: Intent?, f: Int, id: Int) = START_STICKY.also{
+        super.onStartCommand(i, f, id)
+        i?.action?.takeIf{it == "STOP"}?.also{stopSelf()}
     }
 
 }

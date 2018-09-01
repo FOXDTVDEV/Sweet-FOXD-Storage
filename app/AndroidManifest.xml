@@ -3,6 +3,7 @@
           package="fr.rhaz.ipfs.sweet">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
@@ -14,10 +15,12 @@
             android:theme="@style/AppTheme">
 
         <service
-                android:name=".IPFSDaemonService"
-                android:exported="false"
-                />
-        <activity android:name=".activities.MainActivity">
+            android:name=".DaemonService"
+            android:exported="false"
+            android:stopWithTask="false"
+        />
+
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

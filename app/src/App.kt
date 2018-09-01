@@ -2,21 +2,59 @@ package fr.rhaz.ipfs.sweet
 
 import android.app.Activity
 import android.app.Application
-import android.content.ClipData
-import android.content.ClipboardManager
+import android.content.*
+import android.os.Environment
 import android.support.v7.app.AppCompatActivity
+import io.ipfs.kotlin.IPFS
 
 import org.ligi.tracedroid.TraceDroid
+import java.io.File
 
 class App : Application() {
     override fun onCreate() = super.onCreate().also{TraceDroid.init(this)}
 }
 
-object State {
-    var running = false
+val storage get() = Environment.getExternalStorageDirectory()
 
-    fun Activity.clipboard(text: String){
-        val clipboard = getSystemService(AppCompatActivity.CLIPBOARD_SERVICE) as ClipboardManager;
-        clipboard.primaryClip = ClipData.newPlainText("text", text)
+operator fun File.get(path: String) = File(this, path)
+
+val ipfs by lazy{IPFS()}
+
+fun Activity.check(callback: () -> Unit, error: () -> Unit) = Thread{
+    try {
+        ipfs.info.version()
+        runOnUiThread(callback)
+    } catch(ex: Exception){
+        println(ex.message)
+        runOnUiThread(error)
     }
+}.start()
+
+fun Activity.clipboard(text: String){
+    val clipboard = getSystemService(AppCompatActivity.CLIPBOARD_SERVICE) as ClipboardManager;
+    clipboard.primaryClip = ClipData.newPlainText("text", text)
 }
+fun Activity.async(timeout: Int, runnable: () -> Any?, success: (Any) -> Unit, error: () -> Unit) = Thread{
+    try {
+        val result = runnable()
+        if(result != null)
+            runOnUiThread{success(result)}
+        else runOnUiThread(error)
+    }catch(ex: Exception) {runOnUiThread(error)}
+}.let{tasker(it, timeout, error)}
+
+fun Activity.tasker(thread: Thread, timeout: Int, error: () -> Unit) = {
+    thread.start()
+    val start = System.currentTimeMillis()
+    while (thread.isAlive) {
+        Thread.sleep(1000)
+        if (System.currentTimeMillis() - start > (timeout * 1000)){
+            thread.interrupt(); runOnUiThread(error); break
+        }
+    }
+}.let {Thread(it).start()}
+
+fun Activity.wait(timeout: Long, callback: () -> Unit) = {
+    Thread.sleep(timeout)
+    runOnUiThread{ callback() }
+}.let { Thread(it) }.apply { start() }

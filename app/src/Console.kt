@@ -1,5 +1,6 @@
 package fr.rhaz.ipfs.sweet
 
+import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -8,19 +9,30 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.text.format.Formatter
+import android.widget.EditText
 import android.widget.PopupMenu
+import android.widget.TextView
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import fr.rhaz.ipfs.sweet.activities.AddIPFSContentActivity
-import io.ipfs.api.IPFS
 import kotlinx.android.synthetic.main.activity_details.*
+import java.io.FileReader
+import java.nio.file.Files
 
 class ConsoleActivity: AppCompatActivity() {
 
     val ctx = this as Context
 
-    val ipfs = IPFS("/ip4/127.0.0.1/tcp/5001")
-
     override fun onBackPressed() {}
-    override fun onResume() = super.onResume()
+
+    val config by lazy{ JsonParser().parse(FileReader(ipfsd.store["config"])).asJsonObject}
+
+    fun config(consumer: (JsonObject) -> Unit){
+        consumer(config)
+        ipfsd.store["config"].writeBytes(GsonBuilder().setPrettyPrinting().create().toJson(config).toByteArray())
+    }
 
     override fun onCreate(state: Bundle?) = super.onCreate(state).also{
 
@@ -64,50 +76,51 @@ class ConsoleActivity: AppCompatActivity() {
             input.text.clear()
         }}
 
+        val notimpl = {AlertDialog.Builder(ctx).setMessage("This feature is not yet implemented. Sorry").show(); true}
+
         actionbtn.setOnClickListener { btn ->
             PopupMenu(ctx, btn).apply {
                 menu.apply {
-                    add("Add file...").setOnMenuItemClickListener { true.also{
-                        try {
-                            Intent(ACTION_OPEN_DOCUMENT).apply {
-                                addCategory(CATEGORY_OPENABLE)
-                                type = "*/*"
-                                startActivityForResult(this, 1)
-                            }
-                        } catch (e: ActivityNotFoundException) {
-                            Snackbar.make(btn, "Unavailable", Snackbar.LENGTH_LONG).show()
-                        }
-                    }}
-                    add("Add text...").setOnMenuItemClickListener { true.also{
-                        Intent(ctx, AddIPFSContentActivity::class.java).apply {
-                            action = ACTION_SEND
-                            type = "text/plain"
-                            putExtra(EXTRA_TEXT, input.text.toString())
-                            startActivity(this)
-                        }
-                    }}
+                    add("Add file...").setOnMenuItemClickListener {
+                        notimpl()
+//                        true.also{
+//                            try {
+//                                Intent(ACTION_OPEN_DOCUMENT).apply {
+//                                    addCategory(CATEGORY_OPENABLE)
+//                                    type = "*/*"
+//                                    startActivityForResult(this, 1)
+//                                }
+//                            } catch (e: ActivityNotFoundException) {
+//                                Snackbar.make(btn, "Unavailable", Snackbar.LENGTH_LONG).show()
+//                            }
+//                        }
+                    }
+
+                    add("Add folder...").setOnMenuItemClickListener{notimpl()}
+
+                    add("Add text...").setOnMenuItemClickListener{notimpl()}
 
                     add("Garbage collect").setOnMenuItemClickListener { true.also{
                         Thread {
                             val gc = ipfs.repo.gc()
-                            /*runOnUiThread {
+                            runOnUiThread {
                                 AlertDialog.Builder(ctx)
                                     .setMessage("Collected ${gc.size} objects").show()
-                            }*/
+                            }
                         }.start()
                     }}
 
-                    add("Pins management")
-                    add("Keys management")
-                    add("Pub/Sub")
+                    add("Pins management").setOnMenuItemClickListener{notimpl()}
+                    add("Keys management").setOnMenuItemClickListener{notimpl()}
+                    add("Pub/Sub").setOnMenuItemClickListener{notimpl()}
                     addSubMenu("Swarm").apply {
-                        add("Connect to...")
-                        add("Disconnect from...")
+                        add("Connect to...").setOnMenuItemClickListener{notimpl()}
+                        add("Disconnect from...").setOnMenuItemClickListener{notimpl()}
                     }
                     addSubMenu("DHT").apply {
-                        add("Find peer...")
-                        add("Find provs...")
-                        add("Query...")
+                        add("Find peer...").setOnMenuItemClickListener{notimpl()}
+                        add("Find provs...").setOnMenuItemClickListener{notimpl()}
+                        add("Query...").setOnMenuItemClickListener{notimpl()}
                     }
                 }
             }.show()
@@ -117,11 +130,11 @@ class ConsoleActivity: AppCompatActivity() {
             PopupMenu(ctx, it).apply {
                 menu.apply {
                     addSubMenu("Identity").apply {
-                        add("Peer ID")
-                        add("Private Key")
+                        add("Peer ID").setOnMenuItemClickListener{notimpl()}
+                        add("Private Key").setOnMenuItemClickListener{notimpl()}
                     }
-                    add("Peers")
-                    add("Others")
+                    add("Peers").setOnMenuItemClickListener{notimpl()}
+                    add("Others").setOnMenuItemClickListener{notimpl()}
                 }
             }.show()
         }
@@ -129,39 +142,64 @@ class ConsoleActivity: AppCompatActivity() {
         configbtn.setOnClickListener {
             PopupMenu(ctx, it).apply {
                 menu.apply {
-                    add("Bootstrap")
+                    add("Bootstrap").setOnMenuItemClickListener{notimpl()}
                     addSubMenu("Gateway").apply {
                         add("Writable").apply {
                             isCheckable = true
                             isChecked = false
-                        }
+                        }.setOnMenuItemClickListener{notimpl()}
                     }
                     addSubMenu("API").apply {
                         addSubMenu("HTTP Headers").apply {
-                            add("Add origin...")
+                            add("Add origin...").setOnMenuItemClickListener {
+                                AlertDialog.Builder(ctx).apply {
+                                    setTitle("Add API origin")
+                                    fun action(origin: String){
+                                        config{
+                                            it.getAsJsonObject("API").getAsJsonObject("HTTPHeaders").apply {
+                                                if(!has("Access-Control-Allow-Origin")) {
+                                                    add("Access-Control-Allow-Origin", JsonArray())
+                                                    getAsJsonArray("Access-Control-Allow-Origin")
+                                                            .add("http://localhost:3000")
+                                                }
+                                                getAsJsonArray("Access-Control-Allow-Origin").add(origin)
+                                            }
+                                        }
+                                        dismiss()
+                                    }
+
+                                    val input = EditText(ctx).also{setView(it)}.apply {
+                                        hint = "http://..."
+                                        setOnEditorActionListener{tv, i, keyEvent -> action(text.toString()); true}
+                                    }
+                                    setPositiveButton("Apply"){ d, _ -> action(input.text.toString()) }
+                                    setNegativeButton("Cancel"){ d, _ -> d.cancel()}
+                                }.show()
+                                true
+                            }
                         }
                     }
                     addSubMenu("Reprovider").apply {
-                        add("Interval")
-                        add("Strategy")
+                        add("Interval").setOnMenuItemClickListener{notimpl()}
+                        add("Strategy").setOnMenuItemClickListener{notimpl()}
                     }
                     addSubMenu("Experimental").apply {
                         add("Filestore").apply {
                             isCheckable = true
                             isChecked = false
-                        }
+                        }.setOnMenuItemClickListener{notimpl()}
                         add("URL Store").apply {
                             isCheckable = true
                             isChecked = false
-                        }
+                        }.setOnMenuItemClickListener{notimpl()}
                         add("Sharding").apply {
                             isCheckable = true
                             isChecked = false
-                        }
+                        }.setOnMenuItemClickListener{notimpl()}
                         add("LibP2P Stream Mounting").apply {
                             isCheckable = true
                             isChecked = false
-                        }
+                        }.setOnMenuItemClickListener{notimpl()}
                     }
                 }
             }.show()

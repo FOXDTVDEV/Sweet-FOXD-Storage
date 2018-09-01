@@ -7,10 +7,10 @@ android {
 
     defaultConfig {
         applicationId "fr.rhaz.ipfs.sweet"
-        minSdkVersion 24
+        minSdkVersion 19
         targetSdkVersion 27
-        versionCode 11
-        versionName "0.11"
+        versionCode 1
+        versionName "0.1"
         archivesBaseName = "sweetipfs-$versionName"
         vectorDrawables.useSupportLibrary = true
     }
@@ -52,5 +52,8 @@ dependencies {
 
     implementation "org.ligi:tracedroid:1.4"
     implementation 'com.github.kenglxn.QRGen:android:2.4.0'
-    implementation 'com.github.ipfs:java-ipfs-api:v1.2.1'
+    implementation "com.github.ligi:ipfs-api-kotlin:0.13"
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.github.florent37:runtime-permission-kotlin:1.0.1'
+
 }
