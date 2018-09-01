@@ -40,7 +40,12 @@ Minimum Android version: 4.4 (KitKat) (API 19)
 - Notification [finished]
 - Add API origin [needs design improvements]
 
-## Screenshot
+## Screenshots
 
 ![](https://i.imgur.com/GzlgQdy.jpg)
 
+## Join us!
+
+<h2 align="center">
+    <a href="https://discord.gg/ttVYe8S"><img src="https://i.imgur.com/aT9BaNV.png"/></a>
+</h2>
