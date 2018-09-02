@@ -25,8 +25,6 @@ class Daemon(val ctx: Context) {
     val version by lazy{ctx.filesDir["version"]}
 
     fun check(callback: () -> Unit = {}, err: (String) -> Unit = {}){
-        if(ctx !is Activity) return;
-
         if(bin.exists()) callback()
         else install(callback, err)
     }
@@ -46,21 +44,27 @@ class Daemon(val ctx: Context) {
             show()
         }
 
-        Thread {
-            act.assets.open(type).copyTo(FileOutputStream(bin))
-            bin.setExecutable(true)
-            version.writeText(act.assets.open("version").reader().readText());
+        act.assets.open(type).apply {
+            bin.outputStream().also {
+                try {copyTo(it)}
+                finally {
+                    it.close()
+                    close()
+                }
+            }
+        }
 
-            progress.dismiss()
-            act.runOnUiThread(callback)
-        }.start()
+        bin.setExecutable(true)
+        version.writeText(act.assets.open("version").reader().readText());
+
+        progress.dismiss()
+        callback()
     }
 
-    fun run(cmd: String): Process {
-        val env = arrayOf("IPFS_PATH=${store.absolutePath}")
-        val command = "${bin.absolutePath} $cmd"
-        return Runtime.getRuntime().exec(command, env)
-    }
+    fun run(cmd: String) = Runtime.getRuntime().exec(
+        "${bin.absolutePath} $cmd",
+        arrayOf("IPFS_PATH=${store.absolutePath}")
+    )
 
     fun init(callback: () -> Unit = {}){
         val act = ctx as? Activity ?: return
@@ -98,7 +102,7 @@ class DaemonService: Service() {
                 .let { PendingIntent.getActivity(this, 0, it, 0) }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            NotificationChannel("sweetipfs", "Sweet IPFS", IMPORTANCE_LOW).apply {
+            NotificationChannel("sweetipfs", "Sweet IPFS", IMPORTANCE_MIN).apply {
                 description = "Sweet IPFS"
                 getSystemService(NotificationManager::class.java)
                     .createNotificationChannel(this)
@@ -112,17 +116,11 @@ class DaemonService: Service() {
             setContentTitle("IPFS Daemon")
             setContentText("Your IPFS node is running in foreground")
             setContentIntent(open)
-            addAction(ic_menu_close_clear_cancel, "exit", exit)
+            addAction(ic_menu_close_clear_cancel, "Stop", exit)
             build()
         }.also { startForeground(1, it) }
 
-
-                Thread{
-            try {
-                daemon = ipfsd.run("daemon")
-                daemon.waitFor()
-            } catch (e: InterruptedException) { }
-        }.start()
+        daemon = ipfsd.run("daemon")
     }
 
     override fun onDestroy() = super.onDestroy().also{

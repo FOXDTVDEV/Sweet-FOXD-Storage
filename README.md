@@ -16,12 +16,11 @@
     <a href="https://i.imgur.com/GzlgQdy.jpg"><img src="https://i.imgur.com/GzlgQdyl.jpg"/></a>
 </h2>
 
-
 ## Download
 
 Minimum Android version: 4.4 (KitKat) (API 19)
 
-- [Dev build APK](https://github.com/RHazDev/Sweet-IPFS/raw/master/app/apk/sweetipfs-0.1-debug.apk)
+- [Dev build APK](https://github.com/RHazDev/Sweet-IPFS/raw/master/app/apk/sweetipfs-0.1-1-debug.apk)
 
 ## Final Features
 - It can start a new IPFS node or connect to an already running IPFS node

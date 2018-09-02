@@ -3,12 +3,15 @@ package fr.rhaz.ipfs.sweet
 import android.app.Activity
 import android.app.Application
 import android.content.*
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.os.Environment
 import android.support.v7.app.AppCompatActivity
 import io.ipfs.kotlin.IPFS
 
 import org.ligi.tracedroid.TraceDroid
 import java.io.File
+import java.util.ArrayList
 
 class App : Application() {
     override fun onCreate() = super.onCreate().also{TraceDroid.init(this)}
@@ -20,12 +23,20 @@ operator fun File.get(path: String) = File(this, path)
 
 val ipfs by lazy{IPFS()}
 
+fun chain(vararg cbs: (() -> Unit) -> Unit){
+    var last: () -> Unit = {(cbs.last()){}}
+    for(cb in cbs.dropLast(1).reversed()){
+        val last2 = last
+        last = {cb(last2)}
+    }
+    last()
+}
+
 fun Activity.check(callback: () -> Unit, error: () -> Unit) = Thread{
     try {
         ipfs.info.version()
         runOnUiThread(callback)
     } catch(ex: Exception){
-        println(ex.message)
         runOnUiThread(error)
     }
 }.start()
