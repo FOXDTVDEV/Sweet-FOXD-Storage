@@ -1,5 +1,5 @@
 <h3 align="center">
-    <img src="https://i.imgur.com/Uz5MHUH.png"/>
+    <img src="https://i.imgur.com/CswDB8q.png"/>
     <br>
     :earth_africa: Full IPFS node for Android :earth_africa:
 </h3>
