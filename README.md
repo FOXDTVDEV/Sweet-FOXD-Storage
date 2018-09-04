@@ -20,9 +20,7 @@
 
 Minimum Android version: 4.4 (KitKat) (API 19)
 
-- #### [Google Play](https://play.google.com/store/apps/details?id=fr.rhaz.ipfs.sweet)
-
-- [Beta APK](https://github.com/RHazDev/Sweet-IPFS/raw/master/app/apk/sweetipfs-0.1.1-release.apk)
+- #### [Google Play (Beta)](https://play.google.com/store/apps/details?id=fr.rhaz.ipfs.sweet)
 
 - [Development build APK](https://github.com/RHazDev/Sweet-IPFS/raw/master/app/apk/sweetipfs-0.1.1-debug.apk)
 
