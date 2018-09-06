@@ -1,19 +1,15 @@
 package fr.rhaz.ipfs.sweet
 
-import android.R.drawable.*
+import android.R.drawable.ic_menu_close_clear_cancel
 import android.app.*
-import android.app.NotificationManager.*
+import android.app.NotificationManager.IMPORTANCE_MIN
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.os.Binder
 import android.os.Build
-import android.os.Environment
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
-import fr.rhaz.ipfs.sweet.R.drawable.*
-import java.io.File
-import java.io.FileOutputStream
+import fr.rhaz.ipfs.sweet.R.drawable.notificon
 
 val Context.ipfsd
     get() = Daemon(this)

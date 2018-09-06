@@ -9,8 +9,8 @@ android {
         applicationId "fr.rhaz.ipfs.sweet"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 11
-        versionName "0.1.1"
+        versionCode 12
+        versionName "0.1.2"
         archivesBaseName = "sweetipfs-$versionName"
         vectorDrawables.useSupportLibrary = true
     }

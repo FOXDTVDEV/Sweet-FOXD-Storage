@@ -5,21 +5,19 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.*
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.text.format.Formatter
 import android.widget.EditText
 import android.widget.PopupMenu
-import android.widget.TextView
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import fr.rhaz.ipfs.sweet.activities.AddIPFSContentActivity
-import kotlinx.android.synthetic.main.activity_details.*
+import kotlinx.android.synthetic.main.activity_console.*
 import java.io.FileReader
-import java.nio.file.Files
 
 class ConsoleActivity: AppCompatActivity() {
 
@@ -36,7 +34,7 @@ class ConsoleActivity: AppCompatActivity() {
 
     override fun onCreate(state: Bundle?) = super.onCreate(state).also{
 
-        setContentView(R.layout.activity_details)
+        setContentView(R.layout.activity_console)
 
         input.setOnEditorActionListener { textview, i, ev ->  true.also {
             val cmd = input.text.toString()
@@ -82,18 +80,17 @@ class ConsoleActivity: AppCompatActivity() {
             PopupMenu(ctx, btn).apply {
                 menu.apply {
                     add("Add file...").setOnMenuItemClickListener {
-                        notimpl()
-//                        true.also{
-//                            try {
-//                                Intent(ACTION_OPEN_DOCUMENT).apply {
-//                                    addCategory(CATEGORY_OPENABLE)
-//                                    type = "*/*"
-//                                    startActivityForResult(this, 1)
-//                                }
-//                            } catch (e: ActivityNotFoundException) {
-//                                Snackbar.make(btn, "Unavailable", Snackbar.LENGTH_LONG).show()
-//                            }
-//                        }
+                        true.also{
+                            try {
+                                Intent(ACTION_GET_CONTENT).apply {
+                                    //addCategory(CATEGORY_OPENABLE)
+                                    type = "*/*"
+                                    startActivityForResult(createChooser(this, "Add file to IPFS"), 1)
+                                }
+                            } catch (e: ActivityNotFoundException) {
+                                Snackbar.make(btn, "Unavailable", Snackbar.LENGTH_LONG).show()
+                            }
+                        }
                     }
 
                     add("Add folder...").setOnMenuItemClickListener{notimpl()}
@@ -207,17 +204,17 @@ class ConsoleActivity: AppCompatActivity() {
 
     }
 
-    override fun onActivityResult(req: Int, res: Int, resdata: Intent?) =
-        super.onActivityResult(req, res, resdata).also {
-            if(req == 1)
-            if(res == RESULT_OK)
-            if(resdata != null)
-            Intent(ctx, AddIPFSContentActivity::class.java).apply {
+    override fun onActivityResult(req: Int, res: Int, rdata: Intent?){
+        super.onActivityResult(req, res, rdata)
+        if(res != RESULT_OK) return;
+        when(req){
+            1 -> Intent(ctx, ShareActivity::class.java).apply {
+                data = rdata?.data ?: return
                 action = ACTION_SEND
-                data = resdata.data
                 startActivity(this)
             }
         }
+    }
 
     fun Long.format() = Formatter.formatFileSize(ctx, this)
 

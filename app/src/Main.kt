@@ -1,11 +1,9 @@
 package fr.rhaz.ipfs.sweet
 
-import android.Manifest
 import android.Manifest.permission.*
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION
-import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View

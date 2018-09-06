@@ -2,16 +2,13 @@ package fr.rhaz.ipfs.sweet
 
 import android.app.Activity
 import android.app.Application
-import android.content.*
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.os.Environment
 import android.support.v7.app.AppCompatActivity
 import io.ipfs.kotlin.IPFS
-
 import org.ligi.tracedroid.TraceDroid
 import java.io.File
-import java.util.ArrayList
 
 class App : Application() {
     override fun onCreate() = super.onCreate().also{TraceDroid.init(this)}

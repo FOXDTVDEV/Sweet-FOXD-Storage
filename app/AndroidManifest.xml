@@ -32,7 +32,7 @@
             android:windowSoftInputMode="adjustResize"
         />
 
-        <activity android:name=".activities.AddIPFSContentActivity">
+        <activity android:name=".ShareActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -40,88 +40,58 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.BrowseActivity">
+        <activity android:name=".BrowseActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                        android:host="*"
-                        android:scheme="ipfs"/>
+                <data android:host="*" android:scheme="ipfs"/>
             </intent-filter>
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                        android:host="*"
-                        android:scheme="ipns"/>
+                <data android:host="*" android:scheme="ipns"/>
             </intent-filter>
 
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                        android:scheme="fs"/>
+                <data android:scheme="fs"/>
             </intent-filter>
 
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                        android:pathPattern="/ipfs/.*"
-                        android:host="ipfs.io"
-                        android:scheme="http"/>
+                <data android:pathPattern="/ipfs/.*" android:host="ipfs.io" android:scheme="http"/>
             </intent-filter>
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                        android:pathPattern="/ipns/.*"
-                        android:host="ipfs.io"
-                        android:scheme="http"/>
+                <data android:pathPattern="/ipns/.*" android:host="ipfs.io" android:scheme="http"/>
             </intent-filter>
 
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                        android:pathPattern="/ipfs/.*"
-                        android:host="ipfs.io"
-                        android:scheme="https"/>
+                <data android:pathPattern="/ipfs/.*" android:host="ipfs.io" android:scheme="https"/>
             </intent-filter>
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                        android:pathPattern="/ipns/.*"
-                        android:host="ipfs.io"
-                        android:scheme="https"/>
+                <data android:pathPattern="/ipns/.*" android:host="ipfs.io" android:scheme="https"/>
             </intent-filter>
         </activity>
     </application>
