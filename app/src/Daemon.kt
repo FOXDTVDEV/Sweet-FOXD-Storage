@@ -11,14 +11,13 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import fr.rhaz.ipfs.sweet.R.drawable.notificon
 
-val Context.ipfsd
-    get() = Daemon(this)
+val Context.ipfsd get() = Daemon(this)
 
 class Daemon(val ctx: Context) {
 
-    val store by lazy{storage[".ipfs"]}
+    val store by lazy{ctx.getExternalFilesDir(null)["ipfs"]}
     val bin by lazy{ctx.filesDir["ipfsbin"]}
-    val version by lazy{ctx.filesDir["version"]}
+    val version by lazy{ctx.getExternalFilesDir(null)["version"]}
 
     fun check(callback: () -> Unit = {}, err: (String) -> Unit = {}){
         if(bin.exists()) callback()
@@ -73,6 +72,12 @@ class Daemon(val ctx: Context) {
 
         Thread{
             val exec = run("init")
+            Thread {
+                exec.inputStream.bufferedReader().forEachLine { println(it) }
+            }.start()
+            Thread {
+                exec.errorStream.bufferedReader().forEachLine { println(it) }
+            }.start()
             exec.waitFor()
             progress.dismiss()
             act.runOnUiThread(callback)
@@ -117,6 +122,13 @@ class DaemonService: Service() {
         }.also { startForeground(1, it) }
 
         daemon = ipfsd.run("daemon")
+
+        Thread{
+            daemon.inputStream.bufferedReader().forEachLine { println(it) }
+        }.start()
+        Thread{
+            daemon.errorStream.bufferedReader().forEachLine { println(it) }
+        }.start()
     }
 
     override fun onDestroy() = super.onDestroy().also{
