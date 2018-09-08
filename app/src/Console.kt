@@ -83,8 +83,8 @@ class ConsoleActivity: AppCompatActivity() {
                         true.also{
                             try {
                                 Intent(ACTION_GET_CONTENT).apply {
-                                    //addCategory(CATEGORY_OPENABLE)
                                     type = "*/*"
+
                                     startActivityForResult(createChooser(this, "Add file to IPFS"), 1)
                                 }
                             } catch (e: ActivityNotFoundException) {

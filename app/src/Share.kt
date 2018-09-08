@@ -51,14 +51,12 @@ class ShareActivity : AppCompatActivity() {
         .let{ MatrixToImageWriter.toBitmap(it, MatrixToImageConfig(0xFF000000.toInt(), 0x00000000))}
 
     fun stream(intent: Intent) {
-
-        val uri = intent.getParcelableExtra(EXTRA_STREAM) ?: intent.data
+        val uri = intent.data
         title = uri.name
         val temp = File.createTempFile(uri.hashCode().toString(), null, cacheDir)
         val input = uri.inputStream(); val output = temp.outputStream()
         try {input.copyTo(output)} finally { input.close(); output.close() }
         show {ipfs.add.file(temp)}
-
     }
 
     fun show(action: () -> NamedHash?) = Thread {
@@ -80,7 +78,7 @@ class ShareActivity : AppCompatActivity() {
                 clicks(this).buffer(500, TimeUnit.MILLISECONDS, 2).subscribe {
                     when(it.size){
                         2 -> startActivity(Intent(ACTION_VIEW, Uri.parse(url)))
-                        1 -> text = switch()
+                        1 -> runOnUiThread {text = switch()}
                     }
                 }
             }
