@@ -5,6 +5,11 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 27
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     defaultConfig {
         applicationId "fr.rhaz.ipfs.sweet"
         minSdkVersion 19
@@ -52,9 +57,8 @@ dependencies {
 
     implementation "org.ligi:tracedroid:1.4"
     implementation 'com.github.kenglxn.QRGen:android:2.4.0'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
-    implementation "com.github.ligi:ipfs-api-kotlin:0.13"
     implementation 'com.github.ipfs:java-ipfs-api:v1.2.1'
+    implementation 'com.github.multiformats:java-multiaddr:v1.3.1'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.github.tbruyelle:rxpermissions:0.10.1'
     implementation 'com.jakewharton.rxbinding2:rxbinding:2.1.1'

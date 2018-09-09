@@ -84,7 +84,6 @@ class ConsoleActivity: AppCompatActivity() {
                             try {
                                 Intent(ACTION_GET_CONTENT).apply {
                                     type = "*/*"
-
                                     startActivityForResult(createChooser(this, "Add file to IPFS"), 1)
                                 }
                             } catch (e: ActivityNotFoundException) {
@@ -102,7 +101,7 @@ class ConsoleActivity: AppCompatActivity() {
                             val gc = ipfs.repo.gc()
                             runOnUiThread {
                                 AlertDialog.Builder(ctx)
-                                    .setMessage("Collected ${gc.size} objects").show()
+                                    .setMessage("Collected objects").show()
                             }
                         }.start()
                     }}

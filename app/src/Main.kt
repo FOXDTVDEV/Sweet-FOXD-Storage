@@ -1,7 +1,6 @@
 package fr.rhaz.ipfs.sweet
 
 import android.Manifest.permission.*
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION
 import android.os.Bundle
@@ -19,9 +18,7 @@ class MainActivity : AppCompatActivity() {
         startActivity(this)
     }
 
-    fun show() = listOf(text, startbtn).forEach{(it as View).visibility = VISIBLE }.also {
-        println("showed")
-    }
+    fun show() = listOf(text, startbtn).forEach{(it as View).visibility = VISIBLE }
 
     var refresh:() -> Unit = {}
 
@@ -39,41 +36,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         chain(
-            {
+            permission@{
                 RxPermissions(this)
                     .request(INTERNET, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE)
                     .subscribe { granted -> if(granted) it()}
             },
-            {ipfsd.check(it, ::error)},
-            {
-                startbtn.setOnClickListener{chain(ipfsd::init, ::start, {redirect()})}
+            check@{ipfsd.check(it, ::error)},
+            refresh@{
+                startbtn.setOnClickListener{chain(ipfsd::init, ipfsd::start, {redirect()})}
                 refresh = {check(::redirect, ::show)}.also{it()}
             }
         )
-    }
-
-    fun start(callback: () -> Unit) {
-        startService(Intent(this, DaemonService::class.java))
-
-        val progress = ProgressDialog(this).apply {
-            setMessage("Starting...")
-            setCancelable(false)
-            show()
-        }
-
-        Thread{
-
-            while(true.also { Thread.sleep(1000) }) try {
-                ipfsd.version.writeText(
-                    ipfs.info.version()?.Version ?: continue
-                ); break
-            } catch(ex: Exception){}
-
-            runOnUiThread {
-                progress.dismiss()
-                callback()
-            }
-        }.start()
     }
 
 }

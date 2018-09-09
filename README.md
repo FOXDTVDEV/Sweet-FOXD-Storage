@@ -22,7 +22,7 @@ Minimum Android version: 4.4 (KitKat) (API 19)
 
 - #### [Google Play (Beta)](https://play.google.com/store/apps/details?id=fr.rhaz.ipfs.sweet)
 
-- [Development build APK](https://github.com/RHazDev/Sweet-IPFS/raw/master/app/apk/sweetipfs-0.1.2-debug.apk)
+- [Development build APK](https://github.com/RHazDev/Sweet-IPFS/raw/master/app/apk/sweetipfs-0.1.3-debug.apk)
 
 ## Final Features
 - It can start a new IPFS node or connect to an already running IPFS node

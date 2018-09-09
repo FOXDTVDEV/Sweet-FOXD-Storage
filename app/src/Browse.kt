@@ -1,42 +1,71 @@
 package fr.rhaz.ipfs.sweet
 
+import android.app.AlertDialog
+import android.content.Intent
+import android.content.Intent.EXTRA_PROCESS_TEXT
 import android.net.Uri
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.LOLLIPOP
+import android.os.Build.VERSION_CODES.M
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
+import android.webkit.WebSettings.ZoomDensity.*
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import fr.rhaz.ipfs.sweet.IPXSResource
-import fr.rhaz.ipfs.sweet.R
+import io.ipfs.multihash.Multihash
 import kotlinx.android.synthetic.main.activity_browse.*
 
 class BrowseActivity : AppCompatActivity() {
-
-    private var ipxsResource: IPXSResource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_browse)
     }
 
-    override fun onResume() {
-        super.onResume()
+    val uri by lazy {
+        intent.data ?:
+            if(SDK_INT < M) null
+            else Uri.parse(intent.getStringExtra(EXTRA_PROCESS_TEXT))
+    }
 
-        /*val loadToast = LoadToast(this).show()
-        ipxs = IPXSResource(intent.data)*/
-        webView.loadUrl(ipxsResource!!.toPublic())
-        webView.settings.javaScriptEnabled = false
+    override fun onResume() = super.onResume().also{
+        val uri = uri ?: return
+        title = "IPFS Browser"
+        IPXSResource(uri).apply {
+            if(!valid)
+                return AlertDialog.Builder(ctx).apply {
+                    setTitle("Could not find any IPFS resource there")
+                    setPositiveButton("Close"){_,_ -> finish()}
+                }.show().let{Unit}
 
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView, url: String) {
-                super.onPageFinished(view, url)
-
-                //loadToast.success()
+            browser.apply {
+                loadUrl(toPrivate())
+                settings.apply {
+                    javaScriptEnabled = true
+                    javaScriptCanOpenWindowsAutomatically = true
+                    useWideViewPort = true;
+                    loadWithOverviewMode = true;
+                    setSupportZoom(true)
+                    builtInZoomControls = true
+                    displayZoomControls = false
+                    setInitialScale(1);
+                }
+                webViewClient = object: WebViewClient(){
+                    override fun shouldOverrideUrlLoading(view: WebView, req: WebResourceRequest) = false.also{
+                        if (SDK_INT < LOLLIPOP) return true;
+                        IPXSResource(req.url).apply {
+                            if(valid) loadUrl(toPrivate())
+                            else loadUrl(req.url.toString())
+                        }
+                    }
+                }
             }
+            supportActionBar?.subtitle = toString()
         }
-
-        supportActionBar?.subtitle = ipxsResource!!.toString()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -44,52 +73,58 @@ class BrowseActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
-            R.id.publish -> {
-                /*val intent = Intent(this@IPFSBrowseActivity, PublishIPFSContentActivity::class.java)
-                intent.putExtra("HASH", ipxsResource!!.address)
-                startActivity(intent)*/
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.show -> IPXSResource(Uri.parse(browser.url)).apply {
+                if(!valid) return@apply
+                val hash = hash ?: return@apply
+                Intent(ctx, ShareActivity::class.java).apply {
+                    putExtra("hash", hash)
+                    action = Intent.ACTION_SEND
+                    startActivity(this)
+                }
             }
         }
         return super.onOptionsItemSelected(item)
-
     }
+
 }
 
 class IPXSResource(uri: Uri) {
 
-    override fun toString() = "$type:$address"
-    fun toPublic() = "https://ipfs.io/$type/$address/"
+    override fun toString() = "$type://$path"
+    fun toPublic() = "https://ipfs.io/$type/$path/"
+    fun toPrivate() = "http://127.0.0.1:8080/$type/$path"
 
-    val err: (String) -> Nothing = {throw IllegalArgumentException(it)}
+    val valid get() = type != null && path != null
 
-    val address: String by lazy {
-        when (uri.scheme) {
-            "fs" -> {
-                if(uri.host != null) uri.path.substring(1)
-                else uri.pathSegments.run{subList(1, size)}.joinToString("/")
-            }
-            "ipfs", "ipns" -> uri.schemeSpecificPart.substring(2)
-            "http", "https" -> uri.pathSegments.run{subList(1, size)}.joinToString("/")
-            else -> err("Could not resolve address for $uri")
+    val path: String? = when(uri.scheme){
+        "ipfs", "ipns" -> uri.schemeSpecificPart.substring(2)
+        "http", "https" -> uri.pathSegments.run{subList(1, size)}.joinToString("/")
+        else -> when{
+            uri.path.startsWith("/ipfs/") -> uri.path.substring(6)
+            uri.path.startsWith("/ipns/") -> uri.path.substring(6)
+            uri.path.startsWith("ipfs/") -> uri.path.substring(5)
+            uri.path.startsWith("ipns/") -> uri.path.substring(5)
+            uri.path.startsWith("Qm") -> uri.path
+            else -> null
         }
     }
 
-    val type: String by lazy {
-        when(uri.scheme) {
-            "fs" -> (uri.host?.toLowerCase() ?: uri.pathSegments[0].replace("/", "")).also{
-                if(it !in listOf("ipfs", "ipns"))
-                    err("When scheme is fs:// then it must follow with ipfs or ipns but was $it")
-            }
-            "ipfs", "ipns" -> uri.scheme
-            "http", "https" -> uri.pathSegments[0].also{
-                if(uri.host != "ipfs.io")
-                    err("when scheme is http(s) then host has to be ipfs.io")
-                if(it !in listOf("ipfs", "ipns"))
-                    err("cannot handle this ipfs.io url $it")
-            }
-            else -> err("scheme not supported")
+    val hash = path?.split("/")?.get(0)
+
+    val type: String? = when(uri.scheme){
+        "ipfs", "ipns" -> uri.scheme
+        "http", "https" -> uri.pathSegments[0].let{
+            if(it in listOf("ipfs", "ipns")) it else null
+        }
+        else -> when{
+            uri.path.startsWith("/ipfs/") -> "ipfs"
+            uri.path.startsWith("/ipns/") -> "ipns"
+            uri.path.startsWith("ipfs/") -> "ipfs"
+            uri.path.startsWith("ipns/") -> "ipns"
+            uri.path.startsWith("Qm") -> "ipfs"
+            else -> null
         }
     }
 }

@@ -85,6 +85,32 @@ class Daemon(val ctx: Context) {
 
     }
 
+    fun start(callback: () -> Unit) {
+        val act = ctx as? Activity ?: return
+
+        act.startService(Intent(act, DaemonService::class.java))
+
+        val progress = ProgressDialog(act).apply {
+            setMessage("Starting...")
+            setCancelable(false)
+            show()
+        }
+
+        Thread{
+
+            while(true.also { Thread.sleep(1000) }) try {
+                version.writeText(
+                    ipfs.version() ?: continue
+                ); break
+            } catch(ex: Exception){}
+
+            act.runOnUiThread {
+                progress.dismiss()
+                callback()
+            }
+        }.start()
+    }
+
 }
 
 class DaemonService: Service() {
