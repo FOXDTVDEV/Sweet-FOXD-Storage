@@ -2,11 +2,12 @@
     <img src="https://i.imgur.com/YM1XneZ.png"/>
     <br>
     :earth_africa: Full IPFS node for Android :earth_africa:
+    <br><br>
+    <a href="https://play.google.com/store/apps/details?id=fr.rhaz.ipfs.sweet"><img src="http://ligi.de/img/play_badge.png"/></a>
 </h3>
 
 <hr>
 <h3 align="center">
-  <a href="#download">Download</a> •
   <a href="#final-features">Features</a> •
   <a href="#join-us">Join us!</a>
 </h3>
