@@ -12,6 +12,14 @@
     <a href="https://i.imgur.com/GzlgQdy.jpg"><img src="https://i.imgur.com/GzlgQdyl.jpg"/></a>
 </h3>
 
+Sweet IPFS is an Android app that aims to fully run and manage an IPFS node from your phone.
+It is forked from IPFSDroid, which was experimental. This app is currently in beta stage, not all features are implemented, but the most important is. Feel free to test it and review it. If you find a bug or have problems with this app, you can contact me with the email provided on the Google Play page.
+
+Sweet IPFS targets end-users and developers in order to make IPFS (and decentralization) an everyday standard.
+Its main goal is to be used as a file sharing app. For that, it provides a file chooser, QR codes, and a browser. To go even faster, you can upload a file or a text directly from any app by simply sharing it and choosing Sweet IPFS.
+
+At the current point, battery and network usage depends a lot on your phone and your Android version, and may be high. I am working on this in order to provide the best experience and an everyday usage.
+
 ## Download
 
 Minimum Android version: 4.4 (KitKat) (API 19)
