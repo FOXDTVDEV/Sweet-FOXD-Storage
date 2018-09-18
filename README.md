@@ -6,6 +6,8 @@
     <a href="https://play.google.com/store/apps/details?id=fr.rhaz.ipfs.sweet"><img src="http://ligi.de/img/play_badge.png"/></a>
 </h3>
 
+<a href="https://steemit.com/ipfs/@hazae41/sweet-ipfs-full-ipfs-node-for-android"><img src="https://i.imgur.com/dhxagpE.png"/></a><a href="https://github.com/RHazDev/Sweet-IPFS/"><img src="https://i.imgur.com/iolftLK.png"/></a>
+
 <hr>
 
 <h3 align="center">
@@ -49,6 +51,5 @@ Minimum Android version: 4.4 (KitKat) (API 19)
 ## Join us!
 
 <h2 align="center">
-    <a href="https://steemit.com/ipfs/@hazae41/sweet-ipfs-full-ipfs-node-for-android"><img style="max-height: 50px" src="https://i.imgur.com/NjuTf8u.png"/></a>
     <a href="https://discord.gg/ttVYe8S"><img src="https://i.imgur.com/aT9BaNV.png"/></a>
 </h2>
