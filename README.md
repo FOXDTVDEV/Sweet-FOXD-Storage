@@ -7,7 +7,7 @@
 </h3>
 
 
-[![](https://i.imgur.com/dhxagpE.png)](http://ipfs.io/ipfs/QmdCZaK34ALK2dq8f1taXbxFAcngTkC2r21L5WM2paRntb/?referrer=https://github.com/RHazDev/Sweet-IPFS/blob/master/README.md#https://steemit.com/ipfs/@hazae41/sweet-ipfs-full-ipfs-node-for-android#upvote_button)
+[![](https://i.imgur.com/dhxagpE.png)](https://steemit.com/ipfs/@hazae41/sweet-ipfs-full-ipfs-node-for-android#upvote_button)
 [![](https://i.imgur.com/iolftLK.png)](https://github.com/RHazDev/Sweet-IPFS/)
 
 <hr>
