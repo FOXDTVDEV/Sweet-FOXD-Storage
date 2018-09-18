@@ -6,7 +6,7 @@
     <a href="https://play.google.com/store/apps/details?id=fr.rhaz.ipfs.sweet"><img src="http://ligi.de/img/play_badge.png"/></a>
 </h3>
 
-<a href="http://ipfs.io/ipfs/Qmf2fBV3K1wGUQGztoATzLD9LSzaMugE88Q9fdJntZxnwa#https://steemit.com/ipfs/@hazae41/sweet-ipfs-full-ipfs-node-for-android#upvote_button"><img src="https://i.imgur.com/dhxagpE.png"/></a><a href="https://github.com/RHazDev/Sweet-IPFS/"><img src="https://i.imgur.com/iolftLK.png"/></a>
+<a href="http://ipfs.io/ipfs/QmdCZaK34ALK2dq8f1taXbxFAcngTkC2r21L5WM2paRntb/?referrer=https://github.com/RHazDev/Sweet-IPFS&action=popup#https://steemit.com/ipfs/@hazae41/sweet-ipfs-full-ipfs-node-for-android#upvote_button"><img src="https://i.imgur.com/dhxagpE.png"/></a><a href="https://github.com/RHazDev/Sweet-IPFS/"><img src="https://i.imgur.com/iolftLK.png"/></a>
 
 <hr>
 
