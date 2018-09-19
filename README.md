@@ -13,7 +13,9 @@
 <hr>
 
 <h3 align="center">
-    <a href="https://i.imgur.com/GzlgQdy.jpg"><img src="https://i.imgur.com/GzlgQdyl.jpg"/></a>
+    <img src="https://i.imgur.com/SDWWc3x.png"/>
+    <img src="https://i.imgur.com/wwJwSgb.png"/>
+    <img src="https://i.imgur.com/PDXHr8C.png"/>
 </h3>
 
 Sweet IPFS is an Android app that aims to fully run and manage an IPFS node from your phone.
