@@ -57,7 +57,7 @@ Minimum Android version: 4.4 (KitKat) (API 19)
 - It generates QR codes
 - It has a Clear & Minimalist design
 
-## Specifications
+### Specifications
 - It is fully written in **Kotlin**
 - It is a fork of **IPFSDroid** by ligi
 - It uses **go-ipfs** (updated regularly) for the daemon and the command-line interface
@@ -65,7 +65,7 @@ Minimum Android version: 4.4 (KitKat) (API 19)
 - It targets Android **KitKat** (4.4) (API 19)
 - The IPFS logo belongs to IPFS, I just used it
 
-## Join us!
+### Join us!
 You can help the development of this project by contributing to it on GitHub, or join our Discord in order to talk about new features, bugs, or general stuff, ...
 
 <h2 align="center">
