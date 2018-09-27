@@ -56,8 +56,6 @@ fun Activity.clipboard(text: String){
     clipboard.primaryClip = ClipData.newPlainText("text", text)
 }
 
-fun Context.str(id: Int) = getString(id)
-
 fun Activity.async(timeout: Int, runnable: () -> Any?, success: (Any) -> Unit, error: () -> Unit) = Thread{
     try {
         val result = runnable()

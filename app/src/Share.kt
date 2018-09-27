@@ -18,14 +18,12 @@ import java.io.InputStream
 class ShareActivity : AppCompatActivity() {
 
     override fun onCreate(state: Bundle?) = super.onCreate(state).also {
-        if(intent.action == ACTION_SEND) {
-            if(!intent.hasExtra("hash")) check()
-            else Multihash.fromBase58(intent.getStringExtra("hash")).show()
-        }
-        else AlertDialog.Builder(this).apply {
-            setTitle(str(R.string.share_action_not_supported))
-            setNeutralButton(str(R.string.close)){ _, _ -> finish()}
-        }.show()
+        if(!intent.hasExtra("hash")) check()
+        else Multihash.fromBase58(intent.getStringExtra("hash")).show()
+        /*else AlertDialog.Builder(this).apply {
+            setTitle(getString(R.string.share_action_not_supported))
+            setNeutralButton(getString(R.string.close)){ _, _ -> finish()}
+        }.show()*/
     }
 
     // Check that ipfs is running
@@ -35,19 +33,19 @@ class ShareActivity : AppCompatActivity() {
     //      if no: close the activity
     fun check() = check(::process) {
         AlertDialog.Builder(this).apply {
-            setTitle(str(R.string.daemon_not_running))
-            setPositiveButton(str(R.string.start)){ d, _ ->
+            setTitle(getString(R.string.daemon_not_running))
+            setPositiveButton(getString(R.string.start)){ d, _ ->
                 chain(ipfsd::init, ipfsd::start, {d.dismiss(); process()})
             }
-            setNeutralButton(str(R.string.close)){ _, _ -> finish()}
+            setNeutralButton(getString(R.string.close)){ _, _ -> finish()}
         }.show()
     }
 
     // Try to make a file then ask for wrapping it
     // if it could not: say that it could not with a button to close the activity
     fun process() = intent.tempFile?.askWrap() ?: AlertDialog.Builder(this).apply {
-        setTitle(str(R.string.share_cannot_open))
-        setNeutralButton(str(R.string.close)){ _, _ -> finish()}
+        setTitle(getString(R.string.share_cannot_open))
+        setNeutralButton(getString(R.string.close)){ _, _ -> finish()}
     }.show().let{Unit}
 
     // Create file from resource type
@@ -88,9 +86,9 @@ class ShareActivity : AppCompatActivity() {
     // then retrieve its hash
     // then show it
     fun File.askWrap() = AlertDialog.Builder(ctx).apply {
-        setTitle(str(R.string.share_wrap))
+        setTitle(getString(R.string.share_wrap))
         val wrapper = FileWrapper(this@askWrap)
-        setPositiveButton(str(R.string.yes)){ _, _ ->
+        setPositiveButton(getString(R.string.yes)){ _, _ ->
             add {
                 var i: List<MerkleNode>? = null
                 while(i == null) try {i = ipfs.add(wrapper, true)}
@@ -98,7 +96,7 @@ class ShareActivity : AppCompatActivity() {
                 i.last().hash
             }
         }
-        setNegativeButton(str(R.string.no)){ _, _ ->
+        setNegativeButton(getString(R.string.no)){ _, _ ->
             add{
                 var i: List<MerkleNode>? = null
                 while(i == null) try {i = ipfs.add(wrapper, false)}
@@ -109,9 +107,9 @@ class ShareActivity : AppCompatActivity() {
     }.show().let{Unit}
 
     fun error(ex: Exception? = null) = AlertDialog.Builder(ctx).apply {
-        setTitle(str(R.string.share_error))
-        setPositiveButton(str(R.string.report)){ d, _ -> finish()}
-        setNegativeButton(str(R.string.close)){ _, _ -> finish()}
+        setTitle(getString(R.string.share_error))
+        setPositiveButton(getString(R.string.report)){ d, _ -> finish()}
+        setNegativeButton(getString(R.string.close)){ _, _ -> finish()}
     }.show().let{Unit}
 
     // Show hash after adding it

@@ -9,7 +9,12 @@ import android.graphics.Color
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import fr.rhaz.ipfs.sweet.R.drawable.notificon
+import java.io.FileReader
 
 val Context.ipfsd get() = Daemon(this)
 
@@ -18,6 +23,14 @@ class Daemon(val ctx: Context) {
     val store by lazy{ctx.getExternalFilesDir(null)["ipfs"]}
     val bin by lazy{ctx.filesDir["ipfsbin"]}
     val version by lazy{ctx.getExternalFilesDir(null)["version"]}
+
+    val config by lazy{ JsonParser().parse(FileReader(store["config"])).asJsonObject}
+
+    fun config(consumer: (JsonObject) -> Unit){
+        consumer(config)
+        GsonBuilder().setPrettyPrinting().create().toJson(config).toByteArray()
+            .also { store["config"].writeBytes(it) }
+    }
 
     fun check(callback: () -> Unit = {}, err: (String) -> Unit = {}){
         if(bin.exists()) callback()
@@ -30,11 +43,11 @@ class Daemon(val ctx: Context) {
         val type = when {
             Build.CPU_ABI.toLowerCase().startsWith("x86") -> "x86"
             Build.CPU_ABI.toLowerCase().startsWith("arm") -> "arm"
-            else -> return err("${ctx.str(R.string.daemon_unsupported_arch)}: ${Build.CPU_ABI}")
+            else -> return err("${ctx.getString(R.string.daemon_unsupported_arch)}: ${Build.CPU_ABI}")
         }
 
         val progress = ProgressDialog(ctx).apply {
-            setMessage(ctx.str(R.string.daemon_installing))
+            setMessage(ctx.getString(R.string.daemon_installing))
             setCancelable(false)
             show()
         }
@@ -65,7 +78,7 @@ class Daemon(val ctx: Context) {
         val act = ctx as? Activity ?: return
 
         val progress = ProgressDialog(ctx).apply {
-            setMessage(ctx.str(R.string.daemon_init))
+            setMessage(ctx.getString(R.string.daemon_init))
             setCancelable(false)
             show()
         }
@@ -79,6 +92,16 @@ class Daemon(val ctx: Context) {
                 exec.errorStream.bufferedReader().forEachLine { println(it) }
             }.start()
             exec.waitFor()
+            config{
+                it.getAsJsonObject("Swarm").getAsJsonObject("ConnMgr").apply {
+                    remove("LowWater")
+                    addProperty("LowWater", 20)
+                    remove("HighWater")
+                    addProperty("HighWater", 40)
+                    remove("GracePeriod")
+                    addProperty("GracePeriod", "120s")
+                }
+            }
             progress.dismiss()
             act.runOnUiThread(callback)
         }.start()
@@ -91,7 +114,7 @@ class Daemon(val ctx: Context) {
         act.startService(Intent(act, DaemonService::class.java))
 
         val progress = ProgressDialog(act).apply {
-            setMessage(ctx.str(R.string.daemon_starting))
+            setMessage(ctx.getString(R.string.daemon_starting))
             setCancelable(false)
             show()
         }
@@ -140,10 +163,10 @@ class DaemonService: Service() {
             color = Color.parseColor("#4b9fa2")
             setSmallIcon(notificon)
             setShowWhen(false)
-            setContentTitle(str(R.string.notif_title))
-            setContentText(str(R.string.notif_msg))
+            setContentTitle(getString(R.string.notif_title))
+            setContentText(getString(R.string.notif_msg))
             setContentIntent(open)
-            addAction(ic_menu_close_clear_cancel, str(R.string.stop), exit)
+            addAction(ic_menu_close_clear_cancel, getString(R.string.stop), exit)
             build()
         }.also { startForeground(1, it) }
 

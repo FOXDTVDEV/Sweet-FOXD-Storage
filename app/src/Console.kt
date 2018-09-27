@@ -18,19 +18,15 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_console.*
 import java.io.FileReader
+import android.text.InputType
+
+
 
 class ConsoleActivity: AppCompatActivity() {
 
     val ctx = this as Context
 
     override fun onBackPressed() {}
-
-    val config by lazy{ JsonParser().parse(FileReader(ipfsd.store["config"])).asJsonObject}
-
-    fun config(consumer: (JsonObject) -> Unit){
-        consumer(config)
-        ipfsd.store["config"].writeBytes(GsonBuilder().setPrettyPrinting().create().toJson(config).toByteArray())
-    }
 
     override fun onCreate(state: Bundle?) = super.onCreate(state).also{
 
@@ -79,44 +75,60 @@ class ConsoleActivity: AppCompatActivity() {
         actionbtn.setOnClickListener { btn ->
             PopupMenu(ctx, btn).apply {
                 menu.apply {
-                    add(str(R.string.menu_add_file)).setOnMenuItemClickListener {
-                        true.also{
-                            try {
-                                Intent(ACTION_GET_CONTENT).apply {
-                                    type = "*/*"
-                                    startActivityForResult(createChooser(this, str(R.string.title_add_file)), 1)
-                                }
-                            } catch (e: ActivityNotFoundException) {
-                                Snackbar.make(btn, "Unavailable", Snackbar.LENGTH_LONG).show()
-                            }
-                        }
+                    add(getString(R.string.menu_add_file)).setOnMenuItemClickListener {
+                        Intent(ACTION_GET_CONTENT).apply {
+                            type = "*/*"
+                            startActivityForResult(createChooser(this, getString(R.string.title_add_file)), 1)
+                        }; true
                     }
 
-                    add(str(R.string.menu_add_folder)).setOnMenuItemClickListener{notimpl()}
+                    add(getString(R.string.menu_add_folder)).setOnMenuItemClickListener{
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            Intent(ACTION_OPEN_DOCUMENT_TREE).apply {
+                                type = "*/*"
+                                startActivityForResult(createChooser(this, getString(R.string.title_add_folder)), 2)
+                            }
+                        }; true
+                    }
 
-                    add(str(R.string.menu_add_text)).setOnMenuItemClickListener{notimpl()}
+                    add(getString(R.string.menu_add_text)).setOnMenuItemClickListener{
+                        AlertDialog.Builder(ctx).apply {
+                            setTitle(getString(R.string.title_add_text))
+                            val txt = EditText(ctx).apply{
+                                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                                setView(this)
+                            }
+                            setPositiveButton(getString(R.string.apply)){ d, _ ->
+                                Intent(ctx, ShareActivity::class.java).apply {
+                                    type = "text/plain"
+                                    putExtra(EXTRA_TEXT, txt.text.toString())
+                                }
+                            }
+                            setNegativeButton(getString(R.string.cancel)){ d, _ -> }
+                        }.show(); true
+                    }
 
-                    add(str(R.string.menu_garbage_collect)).setOnMenuItemClickListener { true.also{
+                    add(getString(R.string.menu_garbage_collect)).setOnMenuItemClickListener { true.also{
                         Thread {
-                            val gc = ipfs.repo.gc()
+                            ipfs.repo.gc()
                             runOnUiThread {
                                 AlertDialog.Builder(ctx)
-                                    .setMessage(str(R.string.garbage_collected)).show()
+                                    .setMessage(getString(R.string.garbage_collected)).show()
                             }
                         }.start()
                     }}
 
-                    add(str(R.string.menu_pins)).setOnMenuItemClickListener{notimpl()}
-                    add(str(R.string.menu_keys)).setOnMenuItemClickListener{notimpl()}
-                    add(str(R.string.menu_pubsub)).setOnMenuItemClickListener{notimpl()}
-                    addSubMenu(str(R.string.menu_swarm)).apply {
-                        add(str(R.string.menu_swarm_connect)).setOnMenuItemClickListener{notimpl()}
-                        add(str(R.string.menu_swarm_disconnect)).setOnMenuItemClickListener{notimpl()}
+                    add(getString(R.string.menu_pins)).setOnMenuItemClickListener{notimpl()}
+                    add(getString(R.string.menu_keys)).setOnMenuItemClickListener{notimpl()}
+                    add(getString(R.string.menu_pubsub)).setOnMenuItemClickListener{notimpl()}
+                    addSubMenu(getString(R.string.menu_swarm)).apply {
+                        add(getString(R.string.menu_swarm_connect)).setOnMenuItemClickListener{notimpl()}
+                        add(getString(R.string.menu_swarm_disconnect)).setOnMenuItemClickListener{notimpl()}
                     }
-                    addSubMenu(str(R.string.menu_dht)).apply {
-                        add(str(R.string.menu_dht_findpeer)).setOnMenuItemClickListener{notimpl()}
-                        add(str(R.string.menu_dht_findprovs)).setOnMenuItemClickListener{notimpl()}
-                        add(str(R.string.menu_dht_query)).setOnMenuItemClickListener{notimpl()}
+                    addSubMenu(getString(R.string.menu_dht)).apply {
+                        add(getString(R.string.menu_dht_findpeer)).setOnMenuItemClickListener{notimpl()}
+                        add(getString(R.string.menu_dht_findprovs)).setOnMenuItemClickListener{notimpl()}
+                        add(getString(R.string.menu_dht_query)).setOnMenuItemClickListener{notimpl()}
                     }
                 }
             }.show()
@@ -125,26 +137,26 @@ class ConsoleActivity: AppCompatActivity() {
         infobtn.setOnClickListener {
             PopupMenu(ctx, it).apply {
                 menu.apply {
-                    addSubMenu(str(R.string.menu_identity)).apply {
-                        add(str(R.string.menu_identity_peerid)).setOnMenuItemClickListener{
-                            val id = config.getAsJsonObject("Identity").getAsJsonPrimitive("PeerID").asString
+                    addSubMenu(getString(R.string.menu_identity)).apply {
+                        add(getString(R.string.menu_identity_peerid)).setOnMenuItemClickListener{
+                            val id = ipfsd.config.getAsJsonObject("Identity").getAsJsonPrimitive("PeerID").asString
                             AlertDialog.Builder(ctx).apply {
-                                setTitle(str(R.string.title_peerid))
+                                setTitle(getString(R.string.title_peerid))
                                 setMessage(id)
-                                setPositiveButton(str(R.string.copy)){ d, _ -> }
-                                setNeutralButton(str(R.string.close)){ d, _ -> }
+                                setPositiveButton(getString(R.string.copy)){ d, _ -> }
+                                setNeutralButton(getString(R.string.close)){ d, _ -> }
                             }.show().apply {
                                 getButton(AlertDialog.BUTTON_POSITIVE)
                                     .setOnClickListener { clipboard(id) }
                             }; true
                         }
-                        add(str(R.string.menu_identity_privatekey)).setOnMenuItemClickListener{
-                            val key = config.getAsJsonObject("Identity").getAsJsonPrimitive("PrivKey").asString
+                        add(getString(R.string.menu_identity_privatekey)).setOnMenuItemClickListener{
+                            val key = ipfsd.config.getAsJsonObject("Identity").getAsJsonPrimitive("PrivKey").asString
                             AlertDialog.Builder(ctx).apply {
-                                setTitle(str(R.string.title_privatekey))
+                                setTitle(getString(R.string.title_privatekey))
                                 setMessage(key)
-                                setPositiveButton(str(R.string.copy)){ d, _ -> }
-                                setNeutralButton(str(R.string.close)){ d, _ -> }
+                                setPositiveButton(getString(R.string.copy)){ d, _ -> }
+                                setNeutralButton(getString(R.string.close)){ d, _ -> }
                             }.show().apply {
                                 getButton(AlertDialog.BUTTON_POSITIVE)
                                     .setOnClickListener { clipboard(key) }
@@ -155,25 +167,25 @@ class ConsoleActivity: AppCompatActivity() {
                     add(getString(R.string.menu_others)).setOnMenuItemClickListener{
                         async(60, {ipfs.version()},
                             {
-                                val addresses = config.getAsJsonObject("Addresses")
+                                val addresses = ipfsd.config.getAsJsonObject("Addresses")
                                 AlertDialog.Builder(ctx).apply {
                                     setTitle(getString(R.string.title_others))
                                     setMessage("""
-                                        ${str(R.string.others_goipfs_version)}: $it
-                                        ${str(R.string.others_api_address)}: ${addresses.getAsJsonPrimitive("API").asString}
-                                        ${str(R.string.others_gateway_address)}: ${addresses.getAsJsonPrimitive("Gateway").asString}
+                                        ${getString(R.string.others_goipfs_version)}: $it
+                                        ${getString(R.string.others_api_address)}: ${addresses.getAsJsonPrimitive("API").asString}
+                                        ${getString(R.string.others_gateway_address)}: ${addresses.getAsJsonPrimitive("Gateway").asString}
                                     """.trimIndent())
                                     setNeutralButton(getString(R.string.close)){ d, _ -> }
                                 }.show();
                             },
                             {
-                                val addresses = config.getAsJsonObject("Addresses")
+                                val addresses = ipfsd.config.getAsJsonObject("Addresses")
                                 AlertDialog.Builder(ctx).apply {
                                     setTitle(getString(R.string.title_others))
                                     setMessage("""
-                                        ${str(R.string.others_goipfs_version)}: ${str(R.string.others_goipfs_version_unknown)}
-                                        ${str(R.string.others_api_address)}: ${addresses.getAsJsonPrimitive("API").asString}
-                                        ${str(R.string.others_gateway_address)}: ${addresses.getAsJsonPrimitive("Gateway").asString}
+                                        ${getString(R.string.others_goipfs_version)}: ${getString(R.string.others_goipfs_version_unknown)}
+                                        ${getString(R.string.others_api_address)}: ${addresses.getAsJsonPrimitive("API").asString}
+                                        ${getString(R.string.others_gateway_address)}: ${addresses.getAsJsonPrimitive("Gateway").asString}
                                     """.trimIndent())
                                 }.show();
                             }
@@ -199,7 +211,7 @@ class ConsoleActivity: AppCompatActivity() {
                                 AlertDialog.Builder(ctx).apply {
                                     setTitle(getString(R.string.title_add_api_origin))
                                     fun action(origin: String){
-                                        config{
+                                        ipfsd.config{
                                             it.getAsJsonObject("API").getAsJsonObject("HTTPHeaders").apply {
                                                 if(!has("Access-Control-Allow-Origin")) {
                                                     add("Access-Control-Allow-Origin", JsonArray())

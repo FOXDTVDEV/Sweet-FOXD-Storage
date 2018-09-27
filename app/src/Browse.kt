@@ -34,12 +34,12 @@ class BrowseActivity : AppCompatActivity() {
 
     override fun onResume() = super.onResume().also{
         val uri = uri ?: return
-        title = str(R.string.browser_title)
+        title = getString(R.string.browser_title)
         IPXSResource(uri).apply {
             if(!valid)
                 return AlertDialog.Builder(ctx).apply {
-                    setTitle(str(R.string.browser_not_ipxs))
-                    setPositiveButton(str(R.string.close)){ _, _ -> finish()}
+                    setTitle(getString(R.string.browser_not_ipxs))
+                    setPositiveButton(getString(R.string.close)){ _, _ -> finish()}
                 }.show().let{Unit}
 
             supportActionBar?.subtitle = toString()
@@ -69,11 +69,11 @@ class BrowseActivity : AppCompatActivity() {
 
             check(::process) {
                 AlertDialog.Builder(ctx).apply {
-                    setTitle(str(R.string.daemon_not_running))
-                    setPositiveButton(str(R.string.start)){ d, _ ->
+                    setTitle(getString(R.string.daemon_not_running))
+                    setPositiveButton(getString(R.string.start)){ d, _ ->
                         chain(ipfsd::init, ipfsd::start, {d.dismiss(); process()})
                     }
-                    setNeutralButton(str(R.string.close)){ _, _ -> finish()}
+                    setNeutralButton(getString(R.string.close)){ _, _ -> finish()}
                 }.show()
             }
         }

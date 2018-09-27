@@ -10,9 +10,9 @@
     <string name="tap_to_switch">Tap to switch</string>
     <string name="select_to_show_actions">Select to show actions</string>
     <string name="browser_show">Show</string>
-    <string name="menu_add_file">Add file...</string>
-    <string name="menu_add_folder">Add folder...</string>
-    <string name="menu_add_text">Add text...</string>
+    <string name="menu_add_file">Add file…</string>
+    <string name="menu_add_folder">Add folder…</string>
+    <string name="menu_add_text">Add text…</string>
     <string name="menu_garbage_collect">Garbage collect</string>
     <string name="title_add_file">Add file to IPFS</string>
     <string name="garbage_collected">Successfully collected objects</string>
@@ -20,12 +20,12 @@
     <string name="menu_keys">Keys management</string>
     <string name="menu_pubsub" translatable="false">Pub/Sub</string>
     <string name="menu_swarm" translatable="false">Swarm</string>
-    <string name="menu_swarm_connect">Connect to...</string>
-    <string name="menu_swarm_disconnect">Disconnect from...</string>
+    <string name="menu_swarm_connect">Connect to…</string>
+    <string name="menu_swarm_disconnect">Disconnect from…</string>
     <string name="menu_dht" translatable="false">DHT</string>
-    <string name="menu_dht_findpeer">Find peer...</string>
-    <string name="menu_dht_findprovs">Find provs...</string>
-    <string name="menu_dht_query">Query...</string>
+    <string name="menu_dht_findpeer">Find peer…</string>
+    <string name="menu_dht_findprovs">Find provs…</string>
+    <string name="menu_dht_query">Query…</string>
     <string name="menu_identity">Identity</string>
     <string name="menu_identity_peerid">Peer ID</string>
     <string name="title_peerid">Peer ID</string>
@@ -33,8 +33,6 @@
     <string name="close">Close</string>
     <string name="menu_identity_privatekey">Private Key</string>
     <string name="title_privatekey">Private Key</string>
-    <string name="copy">Copy</string>
-    <string name="close">Close</string>
     <string name="menu_peers">Peers</string>
     <string name="menu_others">Others</string>
     <string name="title_others">Others infos</string>
@@ -47,10 +45,8 @@
     <string name="menu_gateway_writable">Writable</string>
     <string name="menu_api">API</string>
     <string name="menu_api_http_headers">HTTP Headers</string>
-    <string name="menu_api_http_headers_addorigin">Add origin...</string>
+    <string name="menu_api_http_headers_addorigin">Add origin…</string>
     <string name="title_add_api_origin">Add API origin</string>
-    <string name="cancel">Cancel</string>
-    <string name="apply">Apply</string>
     <string name="menu_reprovider">Reprovider</string>
     <string name="menu_reprovider_interval">Interval</string>
     <string name="menu_reprovider_strategy">Strategy</string>
@@ -60,29 +56,25 @@
     <string name="menu_experimental_sharding">Sharding</string>
     <string name="menu_experimental_libp2p_stream_mounting" translatable="false">LibP2P Stream Mounting</string>
     <string name="daemon_unsupported_arch">Unsupported architecture</string>
-    <string name="daemon_installing">Installing...</string>
-    <string name="daemon_init">Initializing...</string>
-    <string name="daemon_starting">Starting...</string>
+    <string name="daemon_installing">Installing…</string>
+    <string name="daemon_init">Initializing…</string>
+    <string name="daemon_starting">Starting…</string>
     <string name="notif_title">IPFS Daemon</string>
     <string name="notif_msg">Your IPFS node is running in foreground</string>
     <string name="stop">Stop</string>
     <string name="browser_title">IPFS Browser</string>
     <string name="browser_not_ipxs">Could not find any IPFS resource there</string>
-    <string name="close">Close</string>
-    <string name="daemon_not_running">Daemon not running</string>
-    <string name="start">Start</string>
-    <string name="close">Close</string>
     <string name="share_action_not_supported">This action is not supported</string>
-    <string name="close">Close</string>
     <string name="daemon_not_running">Daemon not running</string>
     <string name="start">Start</string>
-    <string name="close">Close</string>
     <string name="share_cannot_open">Could not open this resource</string>
-    <string name="close">Close</string>
     <string name="share_wrap">Wrap in directory?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="share_error">An error occured while adding your file</string>
+    <string name="share_error">An error occurred while adding your file</string>
     <string name="report">Report</string>
-    <string name="close">Close</string>
+    <string name="cancel">Cancel</string>
+    <string name="apply">Apply</string>
+    <string name="title_add_folder">Add folder to IPFS</string>
+    <string name="title_add_text">Add text to IPFS</string>
 </resources>
