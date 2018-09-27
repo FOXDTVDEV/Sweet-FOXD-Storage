@@ -79,12 +79,12 @@ class ConsoleActivity: AppCompatActivity() {
         actionbtn.setOnClickListener { btn ->
             PopupMenu(ctx, btn).apply {
                 menu.apply {
-                    add("Add file...").setOnMenuItemClickListener {
+                    add(str(R.string.menu_add_file)).setOnMenuItemClickListener {
                         true.also{
                             try {
                                 Intent(ACTION_GET_CONTENT).apply {
                                     type = "*/*"
-                                    startActivityForResult(createChooser(this, "Add file to IPFS"), 1)
+                                    startActivityForResult(createChooser(this, str(R.string.title_add_file)), 1)
                                 }
                             } catch (e: ActivityNotFoundException) {
                                 Snackbar.make(btn, "Unavailable", Snackbar.LENGTH_LONG).show()
@@ -92,31 +92,31 @@ class ConsoleActivity: AppCompatActivity() {
                         }
                     }
 
-                    add("Add folder...").setOnMenuItemClickListener{notimpl()}
+                    add(str(R.string.menu_add_folder)).setOnMenuItemClickListener{notimpl()}
 
-                    add("Add text...").setOnMenuItemClickListener{notimpl()}
+                    add(str(R.string.menu_add_text)).setOnMenuItemClickListener{notimpl()}
 
-                    add("Garbage collect").setOnMenuItemClickListener { true.also{
+                    add(str(R.string.menu_garbage_collect)).setOnMenuItemClickListener { true.also{
                         Thread {
                             val gc = ipfs.repo.gc()
                             runOnUiThread {
                                 AlertDialog.Builder(ctx)
-                                    .setMessage("Collected objects").show()
+                                    .setMessage(str(R.string.garbage_collected)).show()
                             }
                         }.start()
                     }}
 
-                    add("Pins management").setOnMenuItemClickListener{notimpl()}
-                    add("Keys management").setOnMenuItemClickListener{notimpl()}
-                    add("Pub/Sub").setOnMenuItemClickListener{notimpl()}
-                    addSubMenu("Swarm").apply {
-                        add("Connect to...").setOnMenuItemClickListener{notimpl()}
-                        add("Disconnect from...").setOnMenuItemClickListener{notimpl()}
+                    add(str(R.string.menu_pins)).setOnMenuItemClickListener{notimpl()}
+                    add(str(R.string.menu_keys)).setOnMenuItemClickListener{notimpl()}
+                    add(str(R.string.menu_pubsub)).setOnMenuItemClickListener{notimpl()}
+                    addSubMenu(str(R.string.menu_swarm)).apply {
+                        add(str(R.string.menu_swarm_connect)).setOnMenuItemClickListener{notimpl()}
+                        add(str(R.string.menu_swarm_disconnect)).setOnMenuItemClickListener{notimpl()}
                     }
-                    addSubMenu("DHT").apply {
-                        add("Find peer...").setOnMenuItemClickListener{notimpl()}
-                        add("Find provs...").setOnMenuItemClickListener{notimpl()}
-                        add("Query...").setOnMenuItemClickListener{notimpl()}
+                    addSubMenu(str(R.string.menu_dht)).apply {
+                        add(str(R.string.menu_dht_findpeer)).setOnMenuItemClickListener{notimpl()}
+                        add(str(R.string.menu_dht_findprovs)).setOnMenuItemClickListener{notimpl()}
+                        add(str(R.string.menu_dht_query)).setOnMenuItemClickListener{notimpl()}
                     }
                 }
             }.show()
@@ -125,12 +125,60 @@ class ConsoleActivity: AppCompatActivity() {
         infobtn.setOnClickListener {
             PopupMenu(ctx, it).apply {
                 menu.apply {
-                    addSubMenu("Identity").apply {
-                        add("Peer ID").setOnMenuItemClickListener{notimpl()}
-                        add("Private Key").setOnMenuItemClickListener{notimpl()}
+                    addSubMenu(str(R.string.menu_identity)).apply {
+                        add(str(R.string.menu_identity_peerid)).setOnMenuItemClickListener{
+                            val id = config.getAsJsonObject("Identity").getAsJsonPrimitive("PeerID").asString
+                            AlertDialog.Builder(ctx).apply {
+                                setTitle(str(R.string.title_peerid))
+                                setMessage(id)
+                                setPositiveButton(str(R.string.copy)){ d, _ -> }
+                                setNeutralButton(str(R.string.close)){ d, _ -> }
+                            }.show().apply {
+                                getButton(AlertDialog.BUTTON_POSITIVE)
+                                    .setOnClickListener { clipboard(id) }
+                            }; true
+                        }
+                        add(str(R.string.menu_identity_privatekey)).setOnMenuItemClickListener{
+                            val key = config.getAsJsonObject("Identity").getAsJsonPrimitive("PrivKey").asString
+                            AlertDialog.Builder(ctx).apply {
+                                setTitle(str(R.string.title_privatekey))
+                                setMessage(key)
+                                setPositiveButton(str(R.string.copy)){ d, _ -> }
+                                setNeutralButton(str(R.string.close)){ d, _ -> }
+                            }.show().apply {
+                                getButton(AlertDialog.BUTTON_POSITIVE)
+                                    .setOnClickListener { clipboard(key) }
+                            }; true
+                        }
                     }
-                    add("Peers").setOnMenuItemClickListener{notimpl()}
-                    add("Others").setOnMenuItemClickListener{notimpl()}
+                    add(getString(R.string.menu_peers)).setOnMenuItemClickListener{notimpl()}
+                    add(getString(R.string.menu_others)).setOnMenuItemClickListener{
+                        async(60, {ipfs.version()},
+                            {
+                                val addresses = config.getAsJsonObject("Addresses")
+                                AlertDialog.Builder(ctx).apply {
+                                    setTitle(getString(R.string.title_others))
+                                    setMessage("""
+                                        ${str(R.string.others_goipfs_version)}: $it
+                                        ${str(R.string.others_api_address)}: ${addresses.getAsJsonPrimitive("API").asString}
+                                        ${str(R.string.others_gateway_address)}: ${addresses.getAsJsonPrimitive("Gateway").asString}
+                                    """.trimIndent())
+                                    setNeutralButton(getString(R.string.close)){ d, _ -> }
+                                }.show();
+                            },
+                            {
+                                val addresses = config.getAsJsonObject("Addresses")
+                                AlertDialog.Builder(ctx).apply {
+                                    setTitle(getString(R.string.title_others))
+                                    setMessage("""
+                                        ${str(R.string.others_goipfs_version)}: ${str(R.string.others_goipfs_version_unknown)}
+                                        ${str(R.string.others_api_address)}: ${addresses.getAsJsonPrimitive("API").asString}
+                                        ${str(R.string.others_gateway_address)}: ${addresses.getAsJsonPrimitive("Gateway").asString}
+                                    """.trimIndent())
+                                }.show();
+                            }
+                        ); true
+                    }
                 }
             }.show()
         }
@@ -138,25 +186,25 @@ class ConsoleActivity: AppCompatActivity() {
         configbtn.setOnClickListener {
             PopupMenu(ctx, it).apply {
                 menu.apply {
-                    add("Bootstrap").setOnMenuItemClickListener{notimpl()}
-                    addSubMenu("Gateway").apply {
-                        add("Writable").apply {
+                    add(getString(R.string.menu_bootstrap)).setOnMenuItemClickListener{notimpl()}
+                    addSubMenu(getString(R.string.menu_gateway)).apply {
+                        add(getString(R.string.menu_gateway_writable)).apply {
                             isCheckable = true
                             isChecked = false
                         }.setOnMenuItemClickListener{notimpl()}
                     }
-                    addSubMenu("API").apply {
-                        addSubMenu("HTTP Headers").apply {
-                            add("Add origin...").setOnMenuItemClickListener {
+                    addSubMenu(getString(R.string.menu_api)).apply {
+                        addSubMenu(getString(R.string.menu_api_http_headers)).apply {
+                            add(getString(R.string.menu_api_http_headers_addorigin)).setOnMenuItemClickListener {
                                 AlertDialog.Builder(ctx).apply {
-                                    setTitle("Add API origin")
+                                    setTitle(getString(R.string.title_add_api_origin))
                                     fun action(origin: String){
                                         config{
                                             it.getAsJsonObject("API").getAsJsonObject("HTTPHeaders").apply {
                                                 if(!has("Access-Control-Allow-Origin")) {
                                                     add("Access-Control-Allow-Origin", JsonArray())
                                                     getAsJsonArray("Access-Control-Allow-Origin")
-                                                            .add("http://localhost:3000")
+                                                        .add("http://localhost:3000")
                                                 }
                                                 getAsJsonArray("Access-Control-Allow-Origin").add(origin)
                                             }
@@ -168,31 +216,31 @@ class ConsoleActivity: AppCompatActivity() {
                                         hint = "http://..."
                                         setOnEditorActionListener{tv, i, keyEvent -> action(text.toString()); true}
                                     }
-                                    setPositiveButton("Apply"){ d, _ -> action(input.text.toString()) }
-                                    setNegativeButton("Cancel"){ d, _ -> d.cancel()}
+                                    setPositiveButton(getString(R.string.apply)){ d, _ -> action(input.text.toString()) }
+                                    setNegativeButton(getString(R.string.cancel)){ d, _ -> d.cancel()}
                                 }.show()
                                 true
                             }
                         }
                     }
-                    addSubMenu("Reprovider").apply {
-                        add("Interval").setOnMenuItemClickListener{notimpl()}
-                        add("Strategy").setOnMenuItemClickListener{notimpl()}
+                    addSubMenu(getString(R.string.menu_reprovider)).apply {
+                        add(getString(R.string.menu_reprovider_interval)).setOnMenuItemClickListener{notimpl()}
+                        add(getString(R.string.menu_reprovider_strategy)).setOnMenuItemClickListener{notimpl()}
                     }
-                    addSubMenu("Experimental").apply {
-                        add("Filestore").apply {
+                    addSubMenu(getString(R.string.menu_experimental)).apply {
+                        add(getString(R.string.menu_experimental_filestore)).apply {
                             isCheckable = true
                             isChecked = false
                         }.setOnMenuItemClickListener{notimpl()}
-                        add("URL Store").apply {
+                        add(getString(R.string.menu_experimental_urlstore)).apply {
                             isCheckable = true
                             isChecked = false
                         }.setOnMenuItemClickListener{notimpl()}
-                        add("Sharding").apply {
+                        add(getString(R.string.menu_experimental_sharding)).apply {
                             isCheckable = true
                             isChecked = false
                         }.setOnMenuItemClickListener{notimpl()}
-                        add("LibP2P Stream Mounting").apply {
+                        add(getString(R.string.menu_experimental_libp2p_stream_mounting)).apply {
                             isCheckable = true
                             isChecked = false
                         }.setOnMenuItemClickListener{notimpl()}

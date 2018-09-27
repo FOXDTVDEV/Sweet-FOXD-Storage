@@ -1,14 +1,88 @@
 <resources>
-    <string name="app_name">Sweet IPFS</string>
-    <string name="warning_string">This is a playground for developers currently - not a finished product with users in mind</string>
-    <string name="button_download">Copy and init IPFS full node binary for more functions like add / publish / ..</string>
-    <string name="button_update">Update IPFS</string>
+    <string name="app_name" translatable="false">Sweet IPFS</string>
     <string name="button_run_daemon">Start Daemon</string>
-    <string name="button_stop_daemon">Stop Daemon</string>
-    <string name="button_open_test_links_in_browser">Open test links in browser</string>
-    <string name="button_show_licenses">Show FOSS licenses</string>
-    <string name="console_hint">name publish Qm...</string>
+    <string name="console_hint" translatable="false">name publish Qm…</string>
     <string name="menu_config">Config</string>
     <string name="menu_action">Action</string>
     <string name="menu_info">Info</string>
+    <string name="console_hello">Connected! Type  a command or navigate the menus :)</string>
+    <string name="could_not_connect">Could not connect</string>
+    <string name="tap_to_switch">Tap to switch</string>
+    <string name="select_to_show_actions">Select to show actions</string>
+    <string name="browser_show">Show</string>
+    <string name="menu_add_file">Add file...</string>
+    <string name="menu_add_folder">Add folder...</string>
+    <string name="menu_add_text">Add text...</string>
+    <string name="menu_garbage_collect">Garbage collect</string>
+    <string name="title_add_file">Add file to IPFS</string>
+    <string name="garbage_collected">Successfully collected objects</string>
+    <string name="menu_pins">Pins management</string>
+    <string name="menu_keys">Keys management</string>
+    <string name="menu_pubsub" translatable="false">Pub/Sub</string>
+    <string name="menu_swarm" translatable="false">Swarm</string>
+    <string name="menu_swarm_connect">Connect to...</string>
+    <string name="menu_swarm_disconnect">Disconnect from...</string>
+    <string name="menu_dht" translatable="false">DHT</string>
+    <string name="menu_dht_findpeer">Find peer...</string>
+    <string name="menu_dht_findprovs">Find provs...</string>
+    <string name="menu_dht_query">Query...</string>
+    <string name="menu_identity">Identity</string>
+    <string name="menu_identity_peerid">Peer ID</string>
+    <string name="title_peerid">Peer ID</string>
+    <string name="copy">Copy</string>
+    <string name="close">Close</string>
+    <string name="menu_identity_privatekey">Private Key</string>
+    <string name="title_privatekey">Private Key</string>
+    <string name="copy">Copy</string>
+    <string name="close">Close</string>
+    <string name="menu_peers">Peers</string>
+    <string name="menu_others">Others</string>
+    <string name="title_others">Others infos</string>
+    <string name="others_goipfs_version">go-ipfs version</string>
+    <string name="others_goipfs_version_unknown">unknown</string>
+    <string name="others_api_address">API address</string>
+    <string name="others_gateway_address">Gateway address</string>
+    <string name="menu_bootstrap" translatable="false">Bootstrap</string>
+    <string name="menu_gateway">Gateway</string>
+    <string name="menu_gateway_writable">Writable</string>
+    <string name="menu_api">API</string>
+    <string name="menu_api_http_headers">HTTP Headers</string>
+    <string name="menu_api_http_headers_addorigin">Add origin...</string>
+    <string name="title_add_api_origin">Add API origin</string>
+    <string name="cancel">Cancel</string>
+    <string name="apply">Apply</string>
+    <string name="menu_reprovider">Reprovider</string>
+    <string name="menu_reprovider_interval">Interval</string>
+    <string name="menu_reprovider_strategy">Strategy</string>
+    <string name="menu_experimental">Experimental</string>
+    <string name="menu_experimental_filestore">Filestore</string>
+    <string name="menu_experimental_urlstore">URL Store</string>
+    <string name="menu_experimental_sharding">Sharding</string>
+    <string name="menu_experimental_libp2p_stream_mounting" translatable="false">LibP2P Stream Mounting</string>
+    <string name="daemon_unsupported_arch">Unsupported architecture</string>
+    <string name="daemon_installing">Installing...</string>
+    <string name="daemon_init">Initializing...</string>
+    <string name="daemon_starting">Starting...</string>
+    <string name="notif_title">IPFS Daemon</string>
+    <string name="notif_msg">Your IPFS node is running in foreground</string>
+    <string name="stop">Stop</string>
+    <string name="browser_title">IPFS Browser</string>
+    <string name="browser_not_ipxs">Could not find any IPFS resource there</string>
+    <string name="close">Close</string>
+    <string name="daemon_not_running">Daemon not running</string>
+    <string name="start">Start</string>
+    <string name="close">Close</string>
+    <string name="share_action_not_supported">This action is not supported</string>
+    <string name="close">Close</string>
+    <string name="daemon_not_running">Daemon not running</string>
+    <string name="start">Start</string>
+    <string name="close">Close</string>
+    <string name="share_cannot_open">Could not open this resource</string>
+    <string name="close">Close</string>
+    <string name="share_wrap">Wrap in directory?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="share_error">An error occured while adding your file</string>
+    <string name="report">Report</string>
+    <string name="close">Close</string>
 </resources>

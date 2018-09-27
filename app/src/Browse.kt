@@ -34,15 +34,17 @@ class BrowseActivity : AppCompatActivity() {
 
     override fun onResume() = super.onResume().also{
         val uri = uri ?: return
-        title = "IPFS Browser"
+        title = str(R.string.browser_title)
         IPXSResource(uri).apply {
             if(!valid)
                 return AlertDialog.Builder(ctx).apply {
-                    setTitle("Could not find any IPFS resource there")
-                    setPositiveButton("Close"){_,_ -> finish()}
+                    setTitle(str(R.string.browser_not_ipxs))
+                    setPositiveButton(str(R.string.close)){ _, _ -> finish()}
                 }.show().let{Unit}
 
-            browser.apply {
+            supportActionBar?.subtitle = toString()
+
+            fun process() = browser.apply {
                 loadUrl(toPrivate())
                 settings.apply {
                     javaScriptEnabled = true
@@ -63,8 +65,17 @@ class BrowseActivity : AppCompatActivity() {
                         }
                     }
                 }
+            }.let{Unit}
+
+            check(::process) {
+                AlertDialog.Builder(ctx).apply {
+                    setTitle(str(R.string.daemon_not_running))
+                    setPositiveButton(str(R.string.start)){ d, _ ->
+                        chain(ipfsd::init, ipfsd::start, {d.dismiss(); process()})
+                    }
+                    setNeutralButton(str(R.string.close)){ _, _ -> finish()}
+                }.show()
             }
-            supportActionBar?.subtitle = toString()
         }
     }
 

@@ -23,8 +23,8 @@ class ShareActivity : AppCompatActivity() {
             else Multihash.fromBase58(intent.getStringExtra("hash")).show()
         }
         else AlertDialog.Builder(this).apply {
-            setTitle("This action is not supported")
-            setNeutralButton("Close"){_,_ -> finish()}
+            setTitle(str(R.string.share_action_not_supported))
+            setNeutralButton(str(R.string.close)){ _, _ -> finish()}
         }.show()
     }
 
@@ -35,19 +35,19 @@ class ShareActivity : AppCompatActivity() {
     //      if no: close the activity
     fun check() = check(::process) {
         AlertDialog.Builder(this).apply {
-            setTitle("Daemon not running")
-            setPositiveButton("Start"){ d, _ ->
+            setTitle(str(R.string.daemon_not_running))
+            setPositiveButton(str(R.string.start)){ d, _ ->
                 chain(ipfsd::init, ipfsd::start, {d.dismiss(); process()})
             }
-            setNegativeButton("Close"){_,_ -> finish()}
+            setNeutralButton(str(R.string.close)){ _, _ -> finish()}
         }.show()
     }
 
     // Try to make a file then ask for wrapping it
     // if it could not: say that it could not with a button to close the activity
     fun process() = intent.tempFile?.askWrap() ?: AlertDialog.Builder(this).apply {
-        setTitle("Could not open this resource")
-        setNeutralButton("Close"){_,_ -> finish()}
+        setTitle(str(R.string.share_cannot_open))
+        setNeutralButton(str(R.string.close)){ _, _ -> finish()}
     }.show().let{Unit}
 
     // Create file from resource type
@@ -88,9 +88,9 @@ class ShareActivity : AppCompatActivity() {
     // then retrieve its hash
     // then show it
     fun File.askWrap() = AlertDialog.Builder(ctx).apply {
-        setTitle("Wrap in directory?")
+        setTitle(str(R.string.share_wrap))
         val wrapper = FileWrapper(this@askWrap)
-        setPositiveButton("Yes"){_,_ ->
+        setPositiveButton(str(R.string.yes)){ _, _ ->
             add {
                 var i: List<MerkleNode>? = null
                 while(i == null) try {i = ipfs.add(wrapper, true)}
@@ -98,7 +98,7 @@ class ShareActivity : AppCompatActivity() {
                 i.last().hash
             }
         }
-        setNegativeButton("No"){_,_ ->
+        setNegativeButton(str(R.string.no)){ _, _ ->
             add{
                 var i: List<MerkleNode>? = null
                 while(i == null) try {i = ipfs.add(wrapper, false)}
@@ -109,9 +109,9 @@ class ShareActivity : AppCompatActivity() {
     }.show().let{Unit}
 
     fun error(ex: Exception? = null) = AlertDialog.Builder(ctx).apply {
-        setTitle("An error occured while adding your file")
-        setPositiveButton("Report"){d,_ -> finish()}
-        setNegativeButton("Close"){_,_ -> finish()}
+        setTitle(str(R.string.share_error))
+        setPositiveButton(str(R.string.report)){ d, _ -> finish()}
+        setNegativeButton(str(R.string.close)){ _, _ -> finish()}
     }.show().let{Unit}
 
     // Show hash after adding it

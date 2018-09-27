@@ -30,11 +30,11 @@ class Daemon(val ctx: Context) {
         val type = when {
             Build.CPU_ABI.toLowerCase().startsWith("x86") -> "x86"
             Build.CPU_ABI.toLowerCase().startsWith("arm") -> "arm"
-            else -> return err("Unsupported architecture: ${Build.CPU_ABI}")
+            else -> return err("${ctx.str(R.string.daemon_unsupported_arch)}: ${Build.CPU_ABI}")
         }
 
         val progress = ProgressDialog(ctx).apply {
-            setMessage("Installing...")
+            setMessage(ctx.str(R.string.daemon_installing))
             setCancelable(false)
             show()
         }
@@ -65,7 +65,7 @@ class Daemon(val ctx: Context) {
         val act = ctx as? Activity ?: return
 
         val progress = ProgressDialog(ctx).apply {
-            setMessage("Initializing...")
+            setMessage(ctx.str(R.string.daemon_init))
             setCancelable(false)
             show()
         }
@@ -91,7 +91,7 @@ class Daemon(val ctx: Context) {
         act.startService(Intent(act, DaemonService::class.java))
 
         val progress = ProgressDialog(act).apply {
-            setMessage("Starting...")
+            setMessage(ctx.str(R.string.daemon_starting))
             setCancelable(false)
             show()
         }
@@ -140,10 +140,10 @@ class DaemonService: Service() {
             color = Color.parseColor("#4b9fa2")
             setSmallIcon(notificon)
             setShowWhen(false)
-            setContentTitle("IPFS Daemon")
-            setContentText("Your IPFS node is running in foreground")
+            setContentTitle(str(R.string.notif_title))
+            setContentText(str(R.string.notif_msg))
             setContentIntent(open)
-            addAction(ic_menu_close_clear_cancel, "Stop", exit)
+            addAction(ic_menu_close_clear_cancel, str(R.string.stop), exit)
             build()
         }.also { startForeground(1, it) }
 
