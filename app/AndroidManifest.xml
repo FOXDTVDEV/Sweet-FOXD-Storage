@@ -34,7 +34,7 @@
 
         <activity android:name=".ShareActivity"
             android:configChanges="screenLayout|screenSize|orientation">
-            <intent-filter android:label="Share on IPFS">
+            <intent-filter android:label="@string/share_on_ipfs">
                 <action android:name="android.intent.action.SEND"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="*/*"/>
@@ -43,7 +43,7 @@
 
         <activity android:name=".BrowseActivity">
 
-            <intent-filter android:label="Browse on IPFS">
+            <intent-filter android:label="@string/browse_on_ipfs">
                 <action android:name="android.intent.action.PROCESS_TEXT" />
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="text/plain" />

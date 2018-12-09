@@ -22,13 +22,7 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.all {
-            outputFileName = "$archivesBaseName-${variant.name}.apk"
-        }
-        variant.assemble.doLast { assemble ->
-            copy {
-                from variant.outputs*.outputFile
-                into file("/apk")
-            }
+            outputFileName = "../$archivesBaseName-${variant.name}.apk"
         }
     }
 
@@ -54,6 +48,7 @@ dependencies {
     implementation "com.android.support:appcompat-v7:$support_version"
     implementation "com.android.support:design:$support_version"
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.1"
 
     implementation "org.ligi:tracedroid:1.4"
     implementation 'com.github.kenglxn.QRGen:android:2.4.0'
@@ -62,5 +57,4 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.github.tbruyelle:rxpermissions:0.10.1'
     implementation 'com.jakewharton.rxbinding2:rxbinding:2.1.1'
-
 }

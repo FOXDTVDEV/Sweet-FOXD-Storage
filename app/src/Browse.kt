@@ -19,7 +19,7 @@ import android.webkit.WebViewClient
 import io.ipfs.multihash.Multihash
 import kotlinx.android.synthetic.main.activity_browse.*
 
-class BrowseActivity : AppCompatActivity() {
+class BrowseActivity : ScopedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,15 +67,15 @@ class BrowseActivity : AppCompatActivity() {
                 }
             }.let{Unit}
 
-            check(::process) {
+            /*checkAPI(::process) {
                 AlertDialog.Builder(ctx).apply {
                     setTitle(getString(R.string.daemon_not_running))
                     setPositiveButton(getString(R.string.start)){ d, _ ->
-                        chain(ipfsd::init, ipfsd::start, {d.dismiss(); process()})
+                        //ipfsd::init, ipfsd::start, {d.dismiss(); process()})
                     }
                     setNeutralButton(getString(R.string.close)){ _, _ -> finish()}
                 }.show()
-            }
+            }*/
         }
     }
 

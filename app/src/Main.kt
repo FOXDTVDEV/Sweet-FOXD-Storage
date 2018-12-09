@@ -1,52 +1,41 @@
 package fr.rhaz.ipfs.sweet
 
-import android.Manifest.permission.*
-import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.view.View.VISIBLE
-import com.tbruyelle.rxpermissions2.RxPermissions
+import fr.rhaz.ipfs.sweet.R.layout.activity_main
 import kotlinx.android.synthetic.main.activity_main.*
-import org.ligi.tracedroid.sending.TraceDroidEmailSender
+import org.ligi.tracedroid.sending.TraceDroidEmailSender.sendStackTraces
 
-class MainActivity : AppCompatActivity() {
+class MainActivity: ScopedActivity() {
 
-    fun redirect() = Intent(this, ConsoleActivity::class.java).run{
-        flags += FLAG_ACTIVITY_NO_ANIMATION
-        startActivity(this)
+    override fun onResume() {
+        super.onResume()
+        checkPermissions(::ready, ::finish)
     }
 
-    fun show() = listOf(text, startbtn).forEach{(it as View).visibility = VISIBLE }
+    fun ready() { checkAPI(::redirect, ::show)  }
+    fun redirect() = startActivityNoAnimation<ConsoleActivity>()
+    fun show(ex: Exception? = null) = listOf(text, startbtn).forEach(View::visible)
 
-    var refresh:() -> Unit = {}
+    fun error(ex: Exception) {
+        val msg = ex.message ?: return
+        text.apply{text = msg}.visible()
+    }
 
-    override fun onResume() = super.onResume().also{refresh()}
+    override fun onCreate(state: Bundle?){
+        super.onCreate(state)
+        setContentView(activity_main)
+        sendStackTraces("hazae41@gmail.com", ctx)
 
-    override fun onCreate(state: Bundle?) = super.onCreate(state).also {
-
-        setContentView(R.layout.activity_main)
-
-        TraceDroidEmailSender.sendStackTraces("hazae41@gmail.com", this)
-
-        fun error(msg: String) = text.apply{
-            text = msg
-            visibility = VISIBLE
-        }
-
-        chain(
-            permission@{
-                RxPermissions(this)
-                    .request(INTERNET, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE)
-                    .subscribe { granted -> if(granted) it()}
-            },
-            check@{ipfsd.check(it, ::error)},
-            refresh@{
-                startbtn.setOnClickListener{chain(ipfsd::init, ipfsd::start, {redirect()})}
-                refresh = {check(::redirect, ::show)}.also{it()}
+        startbtn.onClick{
+            catchUI(::error){
+                Daemon.apply {
+                    install()
+                    init()
+                    start()
+                }
+                redirect()
             }
-        )
+        }
     }
-
 }

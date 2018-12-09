@@ -34,8 +34,8 @@
     <string name="title_others">Autres infos</string>
     <string name="others_goipfs_version">version go-ipfs</string>
     <string name="others_goipfs_version_unknown">inconnue</string>
-    <string name="others_api_address">Adresse de l\'API</string>
-    <string name="others_gateway_address">Adresse de la passerelle</string>
+    <string name="others_api_address">adresse de l\'API</string>
+    <string name="others_gateway_address">adresse de la passerelle</string>
     <string name="menu_gateway">Passerelle</string>
     <string name="menu_gateway_writable">Autoriser l\'écriture</string>
     <string name="menu_api">API</string>
@@ -71,4 +71,16 @@
     <string name="report">Reporter</string>
     <string name="title_add_folder">Ajouter un dossier à IPFS</string>
     <string name="title_add_text">Ajouter du texte à IPFS</string>
+    <string name="not_impl">Cette fonctionnalité n\'st pas encore disponible. Désolé</string>
+    <string name="share_on_ipfs">Partager sur IPFS</string>
+    <string name="browse_on_ipfs">Ouvrir dans IPFS</string>
+    <string name="review_title">Voulez-vous noter l\'application ?</string>
+    <string name="review_msg">Donnez-nous notre avis \\uD83D\\uDCAC</string>
+    <string name="never">Jamais</string>
+    <string name="share_btn_pin">Épingler</string>
+    <string name="share_btn_unpin">Désépingler</string>
+    <string name="share_btn_publish">Publier</string>
+    <string name="share_btn_export">Exporter</string>
+    <string name="menu_swarm_key">Clé swarm...</string>
+    <string name="error_title">Une erreur est survenue</string>
 </resources>

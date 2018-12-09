@@ -2,8 +2,7 @@ package fr.rhaz.ipfs.sweet
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.content.Intent.ACTION_SEND
-import android.content.Intent.EXTRA_TEXT
+import android.content.Intent.*
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
@@ -15,7 +14,7 @@ import kotlinx.android.synthetic.main.activity_share.*
 import java.io.File
 import java.io.InputStream
 
-class ShareActivity : AppCompatActivity() {
+class ShareActivity : ScopedActivity() {
 
     override fun onCreate(state: Bundle?) = super.onCreate(state).also {
         if(!intent.hasExtra("hash")) check()
@@ -31,15 +30,15 @@ class ShareActivity : AppCompatActivity() {
     // if no: ask to start it
     //      if yes: start it then continue
     //      if no: close the activity
-    fun check() = check(::process) {
+    fun check() = {}/*checkAPI(::process) {
         AlertDialog.Builder(this).apply {
             setTitle(getString(R.string.daemon_not_running))
             setPositiveButton(getString(R.string.start)){ d, _ ->
-                chain(ipfsd::init, ipfsd::start, {d.dismiss(); process()})
+                //chain(ipfsd::init, ipfsd::start, {d.dismiss(); process()})
             }
             setNeutralButton(getString(R.string.close)){ _, _ -> finish()}
         }.show()
-    }
+    }*/
 
     // Try to make a file then ask for wrapping it
     // if it could not: say that it could not with a button to close the activity
@@ -51,7 +50,7 @@ class ShareActivity : AppCompatActivity() {
     // Create file from resource type
     val Intent.tempFile get() = when(type){
         "text/plain" -> text?.tempFile
-        else -> data?.apply{title = name}?.tempFile
+        else -> (getParcelableExtra(EXTRA_STREAM) ?: data)?.apply{title = name}?.tempFile
     }
 
     // Get text resource
@@ -91,7 +90,7 @@ class ShareActivity : AppCompatActivity() {
         setPositiveButton(getString(R.string.yes)){ _, _ ->
             add {
                 var i: List<MerkleNode>? = null
-                while(i == null) try {i = ipfs.add(wrapper, true)}
+                while(i == null) try {i = IPFS().add(wrapper, true)}
                 catch(ex: NullPointerException){}
                 i.last().hash
             }
@@ -99,7 +98,7 @@ class ShareActivity : AppCompatActivity() {
         setNegativeButton(getString(R.string.no)){ _, _ ->
             add{
                 var i: List<MerkleNode>? = null
-                while(i == null) try {i = ipfs.add(wrapper, false)}
+                while(i == null) try {i = IPFS().add(wrapper, false)}
                 catch(ex: NullPointerException){}
                 i!!.last().hash
             }
@@ -137,5 +136,8 @@ class ShareActivity : AppCompatActivity() {
             }
             setOnClickListener { switch() }
         }
+        pinbtn.setOnClickListener{notimpl()}
+        publishbtn.setOnClickListener { notimpl() }
+        exportbtn.setOnClickListener { notimpl() }
     }
 }
