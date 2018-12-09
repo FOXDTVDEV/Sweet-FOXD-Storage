@@ -15,9 +15,8 @@ fun Menu.sub(id: Int, builder: SubMenu.() -> Unit) = addSubMenu(id).apply(builde
 
 operator fun Menu.plus(id: Int) = add(id)
 
-
 fun ConsoleActivity.infoMenu() = infobtn.onClick {
-    popupMenu(it){
+    /*popupMenu(it){
 
         sub(menu_identity){
 
@@ -76,5 +75,5 @@ fun ConsoleActivity.infoMenu() = infobtn.onClick {
                     }
             )
         }
-    }
+    }*/
 }

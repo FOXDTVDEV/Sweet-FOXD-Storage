@@ -14,7 +14,9 @@ import android.widget.PopupMenu
 import fr.rhaz.ipfs.sweet.*
 import fr.rhaz.ipfs.sweet.R.string.*
 import kotlinx.android.synthetic.main.activity_console.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 
 fun Context.popupMenu(anchor: View, builder: Menu.() -> Unit)
     = PopupMenu(ctx, anchor).apply { menu.apply(builder) }.show()
@@ -58,7 +60,7 @@ fun ConsoleActivity.actionMenu() = actionbtn.onClick {
 
         add(menu_garbage_collect).onClick{
             catchUI {
-                async { IPFS().repo.gc() }.await()
+                withContext(Dispatchers.IO) { IPFS().repo.gc() }
                 alertDialog(garbage_collected)
             }
         }

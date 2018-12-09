@@ -29,11 +29,7 @@ class MainActivity: ScopedActivity() {
 
         startbtn.onClick{
             catchUI(::error){
-                Daemon.apply {
-                    install()
-                    init()
-                    start()
-                }
+                Daemon.all()
                 redirect()
             }
         }

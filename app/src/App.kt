@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.*
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.*
 import android.os.Environment
@@ -27,6 +28,8 @@ import net.glxn.qrgen.android.MatrixToImageWriter
 import io.ipfs.api.IPFS
 import kotlinx.coroutines.*
 import org.ligi.tracedroid.TraceDroid
+import org.ligi.tracedroid.collecting.TraceDroidMetaInfo
+import org.ligi.tracedroid.sending.TraceDroidEmailSender
 import java.io.File
 import kotlin.concurrent.thread
 import kotlin.coroutines.*
@@ -35,7 +38,23 @@ class App : Application() {
     override fun onCreate() { super.onCreate(); TraceDroid.init(this) }
 }
 
-fun Context.alert(ex: Exception) { alertDialog(error_title, ex.message); ex.printStackTrace() }
+fun Context.send(ex: Exception){
+    Intent(ACTION_SEND).apply {
+        type = "plain/text"
+        putExtra(EXTRA_EMAIL, arrayOf("hazae41@gmail.com"))
+        putExtra(EXTRA_SUBJECT, "[Error Report] SweetIPFS")
+        putExtra(EXTRA_TEXT, "${ex.javaClass.name}: ${ex.message}\n"+ex.stackTrace?.joinToString("\n"))
+        startActivity(createChooser(this, "Email..."))
+    }
+}
+
+fun Context.alert(ex: Exception) {
+    ex.printStackTrace()
+    alertDialog(error_title, ex.message){
+        setNeutralButton(close){ _,_ -> }
+        setPositiveButton("Send"){ _,_ -> send(ex) }
+    }
+}
 
 fun Context.notimpl() { alertDialog(not_impl, getString(not_impl)) }
 
@@ -57,8 +76,11 @@ fun Context.progress(msg: Int) = ProgressDialog(ctx).apply {
     show()
 }
 
-fun Context.alertDialog(title: Int, builder: Dialog.() -> Unit = {})
-    = Dialog(this, title).apply(builder).show()
+fun Context.alertDialog(title: Int, builder: AlertDialog.Builder.() -> Unit = {})
+    = Dialog(title).apply(builder).show()
+
+fun Context.alertDialog(title: Int, message: String?, builder: AlertDialog.Builder.() -> Unit = {})
+    = Dialog(title).apply { setMessage(message) }.apply(builder).show()
 
 fun Context.alertDialog(title: Int, message: String?)
 = alertDialog(title){
@@ -72,10 +94,7 @@ fun Context.editText(builder: EditText.() -> Unit = {})
     apply(builder)
 }
 
-class Dialog(val ctx: Context, val title: Int): AlertDialog.Builder(ctx){
-    init { setTitle(title) }
-    fun getTitle() = ctx.getString(title)
-}
+fun Context.Dialog(title: Int) = AlertDialog.Builder(ctx).apply{ setTitle(title) }
 
 fun Context.inputDialog(title: Int, action: (EditText) -> Unit)
 = alertDialog(title){

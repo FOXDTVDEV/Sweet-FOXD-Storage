@@ -42,6 +42,8 @@ class Daemon(val ctx: Context): CoroutineScope {
         store["config"].writeBytes(data)
     }
 
+    suspend fun all(){ install(); init(); start() }
+
     suspend fun install() {
 
         val act = ctx as? Activity ?: throw Exception("Not an activity")

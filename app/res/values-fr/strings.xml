@@ -60,7 +60,7 @@
     <string name="stop">Stop</string>
     <string name="browser_title">Navigateur IPFS</string>
     <string name="browser_not_ipxs">Aucune ressource IPFS n\'a été trouvée</string>
-    <string name="daemon_not_running">Noed inactif</string>
+    <string name="daemon_not_running">Noeud inactif</string>
     <string name="start">Démarrer</string>
     <string name="share_action_not_supported">Cette action n\'est pas supportée</string>
     <string name="share_cannot_open">Impossible d\'ouvrir cette ressource</string>
@@ -71,7 +71,7 @@
     <string name="report">Reporter</string>
     <string name="title_add_folder">Ajouter un dossier à IPFS</string>
     <string name="title_add_text">Ajouter du texte à IPFS</string>
-    <string name="not_impl">Cette fonctionnalité n\'st pas encore disponible. Désolé</string>
+    <string name="not_impl">Cette fonctionnalité n\'est pas encore disponible. Désolé</string>
     <string name="share_on_ipfs">Partager sur IPFS</string>
     <string name="browse_on_ipfs">Ouvrir dans IPFS</string>
     <string name="review_title">Voulez-vous noter l\'application ?</string>
@@ -81,6 +81,6 @@
     <string name="share_btn_unpin">Désépingler</string>
     <string name="share_btn_publish">Publier</string>
     <string name="share_btn_export">Exporter</string>
-    <string name="menu_swarm_key">Clé swarm...</string>
+    <string name="menu_swarm_key">Clé swarm…</string>
     <string name="error_title">Une erreur est survenue</string>
 </resources>

@@ -77,4 +77,16 @@
     <string name="apply">Apply</string>
     <string name="title_add_folder">Add folder to IPFS</string>
     <string name="title_add_text">Add text to IPFS</string>
+    <string name="browse_on_ipfs">Browse on IPFS</string>
+    <string name="error_title">An error occured</string>
+    <string name="menu_swarm_key">Swarm key...</string>
+    <string name="never">Never</string>
+    <string name="not_impl">This feature is not yet implemented, sorry</string>
+    <string name="review_msg">Give us your feedback !</string>
+    <string name="review_title">May you review the app?</string>
+    <string name="share_btn_export">Export</string>
+    <string name="share_btn_pin">Pin</string>
+    <string name="share_btn_publish">Publish</string>
+    <string name="share_btn_unpin">Unpin</string>
+    <string name="share_on_ipfs">Share on IPFS</string>
 </resources>
