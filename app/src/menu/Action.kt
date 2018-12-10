@@ -11,11 +11,11 @@ import android.view.Menu
 import android.view.View
 import android.widget.EditText
 import android.widget.PopupMenu
+import com.rustamg.filedialogs.OpenFileDialog
 import fr.rhaz.ipfs.sweet.*
 import fr.rhaz.ipfs.sweet.R.string.*
 import kotlinx.android.synthetic.main.activity_console.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 
 fun Context.popupMenu(anchor: View, builder: Menu.() -> Unit)
@@ -33,9 +33,7 @@ fun ConsoleActivity.actionMenu() = actionbtn.onClick {
         }
 
         add(menu_add_folder).onClick{
-            if (VERSION.SDK_INT < VERSION_CODES.LOLLIPOP)
-                alertDialog(title_add_folder, "Android version not supported")
-            else Intent(ACTION_OPEN_DOCUMENT_TREE).also {
+            Intent(ACTION_OPEN_DOCUMENT_TREE).also {
                 it.type = "*/*"
                 val chooser = createChooser(it, getString(title_add_folder))
                 startActivityForResult(chooser, 2)
@@ -44,24 +42,26 @@ fun ConsoleActivity.actionMenu() = actionbtn.onClick {
 
         add(menu_add_text).onClick{
             alertDialog(title_add_text){
-                val txt = EditText(ctx).apply{
-                    inputType = TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_PASSWORD
-                    setView(this)
-                }
+                val txt = editText{ setView(this) }
+                setCancelable(false)
                 setNegativeButton(getString(cancel)){ d, _ -> }
                 setPositiveButton(apply){ d, _ ->
                     intent<ShareActivity>().apply {
+                        action = ACTION_SEND
                         type = "text/plain"
                         putExtra(EXTRA_TEXT, txt.value)
+                        startActivity(this)
                     }
                 }
             }
         }
 
         add(menu_garbage_collect).onClick{
-            catchUI {
-                withContext(Dispatchers.IO) { IPFS().repo.gc() }
-                alertDialog(garbage_collected)
+            UI {
+                IO { IPFS().repo.gc() }
+                alertDialog(garbage_collected){
+                    setPositiveButton(close){_,_ ->}
+                }
             }
         }
 

@@ -1,142 +1,182 @@
 package fr.rhaz.ipfs.sweet
 
+import android.app.Activity
+import android.app.Activity.*
+import android.app.DialogFragment
+import android.app.DialogFragment.*
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.*
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns.*
+import com.rustamg.filedialogs.FileDialog
+import com.rustamg.filedialogs.FileDialog.*
+import com.rustamg.filedialogs.SaveFileDialog
+import fr.rhaz.ipfs.sweet.R.layout.activity_share
 import fr.rhaz.ipfs.sweet.R.string.*
+import fr.rhaz.ipfs.sweet.R.style.*
 import io.ipfs.api.MerkleNode
-import io.ipfs.api.NamedStreamable.FileWrapper
+import io.ipfs.api.NamedStreamable
+import io.ipfs.api.NamedStreamable.*
 import io.ipfs.multihash.Multihash
 import kotlinx.android.synthetic.main.activity_share.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import java.io.File
-import java.io.File.*
-import java.io.InputStream
 
-class ShareActivity : ScopedActivity() {
+class ShareActivity : ScopedActivity(), FileDialog.OnFileSelectedListener {
 
     override fun onCreate(state: Bundle?){
         super.onCreate(state)
-        if(!intent.hasExtra("hash")) check()
-        else Multihash.fromBase58(intent.getStringExtra("hash")).show()
-    }
 
-    // Check that ipfs is running
-    // if yes: continue
-    // if no: ask to start it
-    //      if yes: start it then continue
-    //      if no: close the activity
-    fun check() = checkAPI(::process) {
-        catchUI {
-            alertDialog(daemon_not_running) {
-                setNeutralButton(close) { _, _ -> finish() }
-                setPositiveButton(start) { d, _ ->
-                    catchUI {
-                        Daemon.all()
-                        d.dismiss()
-                        process()
-                    }
-                }
-            }
+        if(intent.hasExtra("hash")){
+            val hash = intent.getStringExtra("hash")
+            Multihash(hash).show()
         }
 
+        else UI { checkAPI() }
     }
 
-    // Try to make a file then ask for wrapping it
-    // if it could not: say that it could not with a button to close the activity
-    fun process() {
-        catchUI {
-            throw Exception("Test")
-            intent.tempFile?.askWrap()
-            ?: alertDialog(share_cannot_open)
-                { setNeutralButton(close){ _, _ -> finish()} }
+    fun process() { intent.parse() }
+
+    fun checkAPI() = checkAPI(::process) {
+        fun start() = UI {
+            Daemon.all()
+            process()
+        }
+        alertDialog(daemon_not_running) {
+            setNeutralButton(close) { _, _ -> finish() }
+            setPositiveButton(start) { _, _ -> start() }
         }
     }
 
-    // Create file from resource type
-    val Intent.tempFile get() = when(type){
-    "text/plain" -> text?.tempFile
-    else -> (getParcelableExtra(EXTRA_STREAM) ?: data)?.apply{title = name}?.tempFile
-}
+    fun Intent.parse() = when(action) {
+        ACTION_SEND -> when(type) {
+            "text/plain" -> handleText()
+            else -> handleStream()
+        }
+        ACTION_SEND_MULTIPLE -> handleMultiple()
+        else -> throw Exception(share_action_not_supported)
+    }
 
-    // Get text resource
-    val Intent.text get() = getStringExtra(EXTRA_TEXT)?.also{title = it}
+    fun askWrap(then: (Boolean) -> Unit){
+        alertDialog(share_wrap) {
+            setCancelable(false)
+            setPositiveButton(yes){ _, _ -> then(true) }
+            setNegativeButton(no){ _, _ -> then(false) }
+        }
+    }
 
-    // Retrieve uri data
+    fun Intent.handleText() = UI {
+        val text = getStringExtra(EXTRA_TEXT)
+        val name = text.take(30).also { title = it }
+        val bytes = text.toByteArray()
+        val wrapper = ByteArrayWrapper(name, bytes)
+        askWrap{ wrap -> add(wrapper, wrap) }
+    }
+
+    fun Intent.handleStream() = UI {
+        val uri = getParcelableExtra(EXTRA_STREAM) ?: data
+        title = uri.name
+        val wrapper = wrapperOf(uri)
+        askWrap{ wrap -> add(wrapper, wrap) }
+    }
+
+    fun Intent.handleMultiple() = UI {
+        val list = getParcelableArrayListExtra<Uri>(EXTRA_STREAM)
+        val wrappers = list.map(::wrapperOf)
+        val wrapper = DirWrapper("files", wrappers)
+        askWrap{ wrap -> add(wrapper, wrap) }
+    }
+
     val Uri.inputStream get() = contentResolver.openInputStream(this)
 
-    // Retrieve uri name
-    val Uri.name: String get() = contentResolver.query(this, null, null, null, null).run {
-    val index = getColumnIndex(DISPLAY_NAME)
-    moveToFirst()
-    getString(index).also{close()}
-}
-
-    fun InputStream.copyTo(file: File) = file.also{
-        val out = it.outputStream()
-        try { copyTo(out) }
-        finally {close(); out.close()}
-    }
-
-    // Create temp file from uri
-    val Uri.tempFile: File? get() =
-    inputStream.copyTo(createTempFile("temp", name, cacheDir))
-
-    // Create temp file from text
-    val String.tempFile: File? get() =
-    byteInputStream().copyTo(createTempFile("temp", ".txt", cacheDir))
-
-    // Ask if we wrap the file in a dir or not
-    // try to show the file
-    // then retrieve its hash
-    // then show it
-    fun File.askWrap() {
-        alertDialog(share_wrap) {
-            setPositiveButton(yes){ _, _ -> add(true) }
-            setNegativeButton(no){ _, _ -> add(false) }
+    val Uri.name: String get() =
+        if(scheme == "file") lastPathSegment
+        else contentResolver.query(this, null, null, null, null).run {
+            val index = getColumnIndex(DISPLAY_NAME); moveToFirst()
+            getString(index).also{close()}
         }
+
+    fun wrapperOf(uri: Uri): ByteArrayWrapper {
+        val bytes = uri.inputStream.readBytes()
+        return ByteArrayWrapper(uri.name, bytes)
     }
 
-    fun File.add(wrap: Boolean) {
-        val wrapper = FileWrapper(this)
-        catchUI(::alert) {
-            val progress = ctx.progress(share_on_ipfs)
-            val hash = async(Dispatchers.IO){
-                var i: List<MerkleNode>? = null
-                while(i == null)
-                    try {i = IPFS().add(wrapper, wrap)}
-                    catch(ex: NullPointerException){}
-                i.last().hash
-            }.await()
-            progress.dismiss()
-            hash.show()
+    fun add(wrapper: NamedStreamable, wrap: kotlin.Boolean) = UI {
+        val progress = ctx.progress(share_on_ipfs)
+        val hash = IO {
+            var i: List<MerkleNode>? = null
+            while(i == null)
+                try {i = IPFS().add(wrapper, wrap)}
+                catch(ex: NullPointerException){}
+            i.last().hash
         }
+        progress.dismiss()
+        hash.show()
     }
 
-    fun Multihash.show() = catchUI {
-        setContentView(R.layout.activity_share)
+    fun Multihash.show() = UI {
+        setContentView(activity_share)
+        layout.onClick { it.requestFocus() }
+
         val hash = this@show
         val url = "https://ipfs.io/ipfs/$hash"
         qrimg.setImageBitmap(qr(url, 400, 400))
-        layout.onClick { it.requestFocus() }
+
         hashtxt.apply {
             text = "$hash"
             var index = 0
             val switch = {
-                text = when(++index%4){
+                text = when(++index % 5){
                     1 -> url
                     2 -> "ipfs://$hash"
                     3 -> "/ipfs/$hash"
+                    4 -> "https://webui.ipfs.io/#/explore/$hash"
                     else -> "$hash"
                 }
             }
             onClick { switch() }
         }
-        pinbtn.onClick{notimpl()}
+
+        if(hash !in Daemon.pins())
+            pinbtn.text = getString(share_btn_pin)
+
+        pinbtn.onClick{ pin(hash) }
         publishbtn.onClick{notimpl()}
-        exportbtn.onClick{notimpl()}
+        exportbtn.onClick{ export(hash) }
+    }
+
+    fun publish(hash: Multihash) = UI {
+
+    }
+
+    fun pin(hash: Multihash) = UI {
+        if(hash in Daemon.pins()){
+            IO { Daemon.exec("pin rm $hash").waitFor() }
+            pinbtn.text = getString(share_btn_pin)
+        }
+        else {
+            IO { Daemon.exec("pin add $hash").waitFor() }
+            pinbtn.text = getString(share_btn_unpin)
+        }
+    }
+
+    fun export(hash: Multihash) = UI {
+        SaveFileDialog().apply {
+            arguments = Bundle().apply {
+                putString("hash", hash.toString())
+                putString("extension", ".ipfs")
+            }
+            setStyle(DialogFragment.STYLE_NO_TITLE, AppTheme)
+            show(supportFragmentManager, "SaveFileDialog")
+        }
+    }
+
+    override fun onFileSelected(dialog: FileDialog, file: File) {
+        val hash = dialog.arguments?.getString("hash") ?: return
+        file.apply {
+            createNewFile()
+            writeText(hash)
+        }
     }
 }

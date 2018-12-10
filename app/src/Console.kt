@@ -54,7 +54,7 @@ class ConsoleActivity: ScopedActivity() {
         }
     }
 
-    fun mkconsole() = input.setOnEditorActionListener { _, _, _ ->
+    fun mkconsole() = input.onWrite {
         val cmd = input.value
         input.text.clear()
         append("> $cmd")
@@ -62,12 +62,11 @@ class ConsoleActivity: ScopedActivity() {
             val process = Daemon.exec(cmd)
             fun print(line: String) {
                 println(line)
-                UI { append(line) }
+                unsafeUI { append(line) }
             }
             launch { process.inputStream.reader().forEachLine(::print) }
             launch { process.errorStream.reader().forEachLine(::print) }
             process.waitFor()
         }
-        true
     }
 }

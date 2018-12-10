@@ -2,6 +2,7 @@ package fr.rhaz.ipfs.sweet
 
 import android.os.Bundle
 import android.view.View
+import android.view.View.GONE
 import fr.rhaz.ipfs.sweet.R.layout.activity_main
 import kotlinx.android.synthetic.main.activity_main.*
 import org.ligi.tracedroid.sending.TraceDroidEmailSender.sendStackTraces
@@ -20,6 +21,7 @@ class MainActivity: ScopedActivity() {
     fun error(ex: Exception) {
         val msg = ex.message ?: return
         text.apply{text = msg}.visible()
+        startbtn.visibility = GONE
     }
 
     override fun onCreate(state: Bundle?){
@@ -28,7 +30,7 @@ class MainActivity: ScopedActivity() {
         sendStackTraces("hazae41@gmail.com", ctx)
 
         startbtn.onClick{
-            catchUI(::error){
+            UI {
                 Daemon.all()
                 redirect()
             }

@@ -5,29 +5,30 @@ import android.app.*
 import android.app.NotificationManager.IMPORTANCE_MIN
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Color.*
 import android.os.Build.*
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import android.util.Log
+import com.google.gson.*
 import fr.rhaz.ipfs.sweet.R.drawable.notificon
 import fr.rhaz.ipfs.sweet.R.string.*
+import fr.rhaz.ipfs.sweet.utils.array
+import fr.rhaz.ipfs.sweet.utils.json
+import fr.rhaz.ipfs.sweet.utils.obj
+import fr.rhaz.ipfs.sweet.utils.set
 import kotlinx.coroutines.*
 import java.io.FileReader
-import java.io.IOException
 import java.lang.Runtime.*
 import kotlin.concurrent.thread
-import kotlin.coroutines.CoroutineContext
 
 val Context.Daemon get() = Daemon(this)
 
 class Daemon(val ctx: Context): CoroutineScope {
-    override val coroutineContext = Job()
+    private val job = SupervisorJob()
+    override val coroutineContext get() = Dispatchers.Main + job
 
-    val store get() = ctx.getExternalFilesDir(null)["ipfs"]
+    val store get() = ctx.getExternalFilesDir(null)!!["ipfs"]
     val bin get() = ctx.filesDir["ipfsbin"]
     val config get() = JsonParser().parse(FileReader(store["config"])).asJsonObject
 
@@ -37,9 +38,9 @@ class Daemon(val ctx: Context): CoroutineScope {
     )
 
     fun config(consumer: JsonObject.() -> Unit){
-        consumer(config)
-        val data = GsonBuilder().setPrettyPrinting().create().toJson(config).toByteArray()
-        store["config"].writeBytes(data)
+        val config = config.apply(consumer)
+        val data = GsonBuilder().setPrettyPrinting().create().toJson(config)
+        store["config"].writeBytes(data.toByteArray())
     }
 
     suspend fun all(){ install(); init(); start() }
@@ -50,13 +51,17 @@ class Daemon(val ctx: Context): CoroutineScope {
 
         val progress = ctx.progress(daemon_installing)
 
-        val type = when {
-            CPU_ABI.toLowerCase().startsWith("x86") -> "x86"
-            CPU_ABI.toLowerCase().startsWith("arm") -> "arm"
-            else -> throw Exception("${ctx.getString(daemon_unsupported_arch)}: $CPU_ABI")
+        val type = when(val abi = SUPPORTED_ABIS[0]) {
+            "arm64-v8a" -> "arm64"
+            "x86_64" -> "amd64"
+            "armeabi", "armeabi-v7a" -> "arm"
+            "386" -> "386"
+            else -> throw Exception("${ctx.getString(daemon_unsupported_arch)}: $abi")
         }
 
-        async {
+        IO {
+            bin.delete()
+            bin.createNewFile()
             val input = act.assets.open(type)
             val output = bin.outputStream()
             try {
@@ -65,7 +70,7 @@ class Daemon(val ctx: Context): CoroutineScope {
                 input.close(); output.close()
             }
             bin.setExecutable(true)
-        }.await()
+        }
 
         progress.dismiss()
     }
@@ -74,20 +79,21 @@ class Daemon(val ctx: Context): CoroutineScope {
 
         val progress = ctx.progress(daemon_init)
 
-        async { exec("init").waitFor() }.await()
+        IO { exec("init").waitFor() }
 
-        async{
+        IO {
             config{
-                getAsJsonObject("Swarm").getAsJsonObject("ConnMgr").apply {
-                    remove("LowWater")
-                    addProperty("LowWater", 20)
-                    remove("HighWater")
-                    addProperty("HighWater", 40)
-                    remove("GracePeriod")
-                    addProperty("GracePeriod", "120s")
-                }
+                // Allow webui
+                val headers = obj("API").obj("HTTPHeaders")
+                val origins = headers.array("Access-Control-Allow-Origin")
+                val webui = json("https://webui.ipfs.io")
+                if(webui !in origins) origins.add(webui)
+
+                // Reduce CPU usage
+                val connmgr = obj("Swarm").obj("ConnMgr")
+                connmgr.set("GracePeriod", json("40s"))
             }
-        }.await()
+        }
 
         progress.dismiss()
     }
@@ -98,14 +104,23 @@ class Daemon(val ctx: Context): CoroutineScope {
         ctx.startService<DaemonService>()
         val progress = ctx.progress(daemon_starting)
 
-        async{
+        IO {
             fun check() =
                 try{ IPFS(); true}
                 catch (ex: Exception){false}
             while(!check()) delay(1000)
-        }.await()
+        }
 
         progress.dismiss()
+    }
+
+    suspend fun pins() = IO {
+        exec("pin ls").run {
+            waitFor()
+            val lines = inputStream.reader().readLines()
+            val pins = lines.map { it.split(" ") }.filter { it[1] == "recursive" }
+            pins.map { Multihash(it[0]) }
+        }
     }
 
 }
@@ -152,5 +167,4 @@ class DaemonService: ScopedService() {
         super.onStartCommand(i, f, id)
         i?.action?.takeIf{it == "STOP"}?.also{stopSelf()}
     }
-
 }

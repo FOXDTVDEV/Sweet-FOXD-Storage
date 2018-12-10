@@ -10,17 +10,26 @@ import android.os.Environment
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.widget.EditText
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import fr.rhaz.ipfs.sweet.R.string.error_title
 import io.ipfs.api.IPFS
+import io.ipfs.multihash.Multihash
 import net.glxn.qrgen.android.MatrixToImageConfig
 import net.glxn.qrgen.android.MatrixToImageWriter
 import java.io.File
+import java.lang.Exception
 
-fun IPFS(): IPFS = IPFS("localhost", 5001)
+fun Context.Exception(id: Int) = Exception(getString(id))
+fun Multihash(base58: String) = Multihash.fromBase58(base58)
+
+fun IPFS(): IPFS = IPFS("127.0.0.1", 5001)
 
 val Context.ctx get() = this
 val Context.prefs get() = PreferenceManager.getDefaultSharedPreferences(this)
@@ -33,9 +42,7 @@ operator fun File.get(path: String) = File(this, path)
 
 fun View.visible(){ visibility = View.VISIBLE }
 
-fun JsonObject.primitive(key: String) = getAsJsonPrimitive(key)
-fun JsonObject.array(key: String) = getAsJsonArray(key)
-fun JsonObject.obj(key: String) = getAsJsonObject(key)
+fun EditText.onWrite(action: () -> Unit) = setOnEditorActionListener { _, _, _ -> action(); true }
 
 fun rethrow(ex: Throwable): Nothing = throw ex
 
@@ -44,7 +51,7 @@ fun Context.catch(title: Int = error_title, callback: () -> Unit){
 }
 
 fun Activity.clipboard(text: String){
-    val clipboard = getSystemService(AppCompatActivity.CLIPBOARD_SERVICE) as ClipboardManager;
+    val clipboard = getSystemService(AppCompatActivity.CLIPBOARD_SERVICE) as ClipboardManager
     clipboard.primaryClip = ClipData.newPlainText("text", text)
 }
 

@@ -49,16 +49,16 @@ class BrowseActivity : ScopedActivity() {
                 settings.apply {
                     javaScriptEnabled = true
                     javaScriptCanOpenWindowsAutomatically = true
-                    useWideViewPort = true;
-                    loadWithOverviewMode = true;
+                    useWideViewPort = true
+                    loadWithOverviewMode = true
                     setSupportZoom(true)
                     builtInZoomControls = true
                     displayZoomControls = false
-                    setInitialScale(1);
+                    setInitialScale(1)
                 }
                 webViewClient = object: WebViewClient(){
                     override fun shouldOverrideUrlLoading(view: WebView, req: WebResourceRequest) = false.also{
-                        if (SDK_INT < LOLLIPOP) return true;
+                        if (SDK_INT < LOLLIPOP) return true
                         IPXSResource(req.url).apply {
                             if(valid) loadUrl(toPrivate())
                             else loadUrl(req.url.toString())
