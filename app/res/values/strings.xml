@@ -100,4 +100,6 @@
     <string name="publish_confirm">Are you sure you want to publish to %s?</string>
     <string name="menu_experimental_p2phttpproxy">P2P-HTTP Proxy</string>
     <string name="menu_experimental_quic" translatable="false">QUIC</string>
+    <string name="exported">Exported to %s</string>
+    <string name="filename">File name</string>
 </resources>

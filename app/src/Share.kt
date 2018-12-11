@@ -1,17 +1,14 @@
 package fr.rhaz.ipfs.sweet
 
-import android.app.DialogFragment
-import android.app.ProgressDialog.show
 import android.content.Intent
 import android.content.Intent.*
 import android.net.Uri
 import android.os.Bundle
-import android.provider.OpenableColumns.DISPLAY_NAME
-import com.rustamg.filedialogs.FileDialog
-import com.rustamg.filedialogs.SaveFileDialog
+import android.os.Environment.getExternalStorageDirectory
+import android.provider.DocumentsContract
+import android.provider.DocumentsContract.Document.*
 import fr.rhaz.ipfs.sweet.R.layout.activity_share
 import fr.rhaz.ipfs.sweet.R.string.*
-import fr.rhaz.ipfs.sweet.R.style.AppTheme
 import io.ipfs.api.MerkleNode
 import io.ipfs.api.NamedStreamable
 import io.ipfs.api.NamedStreamable.ByteArrayWrapper
@@ -19,9 +16,8 @@ import io.ipfs.api.NamedStreamable.DirWrapper
 import io.ipfs.multihash.Multihash
 import kotlinx.android.synthetic.main.activity_share.*
 import org.jetbrains.anko.*
-import java.io.File
 
-class ShareActivity : ScopedActivity(), FileDialog.OnFileSelectedListener {
+class ShareActivity : ScopedActivity() {
 
     override fun onCreate(state: Bundle?){
         super.onCreate(state)
@@ -183,21 +179,29 @@ class ShareActivity : ScopedActivity(), FileDialog.OnFileSelectedListener {
     }
 
     fun export(hash: Multihash) = UI {
-        SaveFileDialog().apply {
-            arguments = Bundle().apply {
-                putString("hash", hash.toString())
-                putString("extension", ".ipfs")
+        val sdcard = getExternalStorageDirectory()
+        val folder = sdcard["IPFS"].apply { mkdir() }
+        alert{
+            title = getString(share_btn_export)
+            val input = inputView{ hint = getString(filename) }
+            okButton {
+                UI{
+                    val file = folder["${input.value}.ipfs"]
+                    IO{
+                        file.createNewFile()
+                        file.writeText(hash.toBase58())
+                    }
+                    val path = file.relativeTo(sdcard).path
+                    alert{
+                        title = getString(share_btn_export)
+                        message = getString(exported, "sdcard/$path")
+                        okButton{}
+                        negativeButton(copy){ clipboard(file.path)}
+                    }.show()
+                }
             }
-            setStyle(DialogFragment.STYLE_NO_TITLE, AppTheme)
-            show(supportFragmentManager, "SaveFileDialog")
-        }
-    }
-
-    override fun onFileSelected(dialog: FileDialog, file: File) {
-        val hash = dialog.arguments?.getString("hash") ?: return
-        file.apply {
-            createNewFile()
-            writeText(hash)
+            cancelButton {}
+            show()
         }
     }
 }

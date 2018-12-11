@@ -93,4 +93,6 @@
     <string name="title_api_headers_origin">Origines autorisées pour l\'API</string>
     <string name="menu_api_headers">En-têtes</string>
     <string name="menu_experimental_p2phttpproxy">Proxy P2P-HTTP</string>
+    <string name="exported">Exporté dans %s</string>
+    <string name="filename">Nom du fichier</string>
 </resources>

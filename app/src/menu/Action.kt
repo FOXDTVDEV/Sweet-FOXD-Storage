@@ -110,6 +110,7 @@ fun ConsoleActivity.actionMenu() = actionbtn.onClick{
                                         alert{
                                             title = hash
                                             val input = inputView{
+                                                setText(key.name)
                                                 if(key.name == "self") isEnabled = false
                                             }
                                             if(key.name != "self")
@@ -125,7 +126,7 @@ fun ConsoleActivity.actionMenu() = actionbtn.onClick{
                                             negativeButton(copy){ clipboard(hash) }
                                             okButton {
                                                 if(key.name != input.value)
-                                                UI { IO { IPFS().key.rename(key.name, input.value)} }
+                                                UIO { IPFS().key.rename(key.name, input.value) }
                                             }
                                             show()
                                         }
