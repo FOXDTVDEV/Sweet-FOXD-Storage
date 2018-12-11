@@ -144,7 +144,7 @@ class DaemonService: ScopedService() {
             startForeground(1, build())
         }
 
-        daemon = Daemon.exec("daemon")
+        daemon = Daemon.exec("daemon --enable-pubsub-experiment --enable-namesys-pubsub")
     }
 
     override fun onDestroy() = super.onDestroy().also{

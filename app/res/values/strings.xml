@@ -10,9 +10,9 @@
     <string name="tap_to_switch">Tap to switch</string>
     <string name="select_to_show_actions">Select to show actions</string>
     <string name="browser_show">Show</string>
-    <string name="menu_add_file">Add file…</string>
-    <string name="menu_add_folder">Add folder…</string>
-    <string name="menu_add_text">Add text…</string>
+    <string name="menu_add_file">Add file</string>
+    <string name="menu_add_folder">Add folder</string>
+    <string name="menu_add_text">Add text</string>
     <string name="menu_garbage_collect">Garbage collect</string>
     <string name="title_add_file">Add file to IPFS</string>
     <string name="garbage_collected">Successfully collected objects</string>
@@ -20,12 +20,12 @@
     <string name="menu_keys">Keys management</string>
     <string name="menu_pubsub" translatable="false">Pub/Sub</string>
     <string name="menu_swarm" translatable="false">Swarm</string>
-    <string name="menu_swarm_connect">Connect to…</string>
-    <string name="menu_swarm_disconnect">Disconnect from…</string>
+    <string name="menu_swarm_connect">Connect to</string>
+    <string name="menu_swarm_disconnect">Disconnect from</string>
     <string name="menu_dht" translatable="false">DHT</string>
-    <string name="menu_dht_findpeer">Find peer…</string>
-    <string name="menu_dht_findprovs">Find provs…</string>
-    <string name="menu_dht_query">Query…</string>
+    <string name="menu_dht_findpeer">Find peer</string>
+    <string name="menu_dht_findprovs">Find provs</string>
+    <string name="menu_dht_query">Query</string>
     <string name="menu_identity">Identity</string>
     <string name="menu_identity_peerid">Peer ID</string>
     <string name="title_peerid">Peer ID</string>
@@ -36,17 +36,16 @@
     <string name="menu_peers">Peers</string>
     <string name="menu_others">Others</string>
     <string name="title_others">Others infos</string>
-    <string name="others_goipfs_version">go-ipfs version</string>
-    <string name="others_goipfs_version_unknown">unknown</string>
+    <string name="others_goipfs_version">IPFS version</string>
     <string name="others_api_address">API address</string>
     <string name="others_gateway_address">Gateway address</string>
     <string name="menu_bootstrap" translatable="false">Bootstrap</string>
     <string name="menu_gateway">Gateway</string>
-    <string name="menu_gateway_writable">Writable</string>
+    <string name="menu_gateway_writable">Writable gateway</string>
     <string name="menu_api">API</string>
-    <string name="menu_api_http_headers">HTTP Headers</string>
-    <string name="menu_api_http_headers_addorigin">Add origin…</string>
-    <string name="title_add_api_origin">Add API origin</string>
+    <string name="menu_api_headers">Headers</string>
+    <string name="menu_api_headers_origins">Origins</string>
+    <string name="title_api_headers_origin">Allowed API origins</string>
     <string name="menu_reprovider">Reprovider</string>
     <string name="menu_reprovider_interval">Interval</string>
     <string name="menu_reprovider_strategy">Strategy</string>
@@ -79,7 +78,7 @@
     <string name="title_add_text">Add text to IPFS</string>
     <string name="browse_on_ipfs">Browse on IPFS</string>
     <string name="error_title">An error occured</string>
-    <string name="menu_swarm_key">Swarm key...</string>
+    <string name="menu_swarm_key">Swarm key</string>
     <string name="never">Never</string>
     <string name="not_impl">This feature is not yet implemented, sorry</string>
     <string name="review_msg">Give us your feedback !</string>
@@ -90,7 +89,7 @@
     <string name="share_btn_unpin">Unpin</string>
     <string name="share_on_ipfs">Share on IPFS</string>
     <string name="title_action_pins">%d pins</string>
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading…</string>
     <string name="ask_open_hash">Do you want to open this hash?</string>
     <string name="title_info_peers">%d peers</string>
     <string name="btn_add_key">New</string>
@@ -99,4 +98,6 @@
     <string name="connecting">Connecting…</string>
     <string name="publishing">Publishing… Please be patient…</string>
     <string name="publish_confirm">Are you sure you want to publish to %s?</string>
+    <string name="menu_experimental_p2phttpproxy">P2P-HTTP Proxy</string>
+    <string name="menu_experimental_quic" translatable="false">QUIC</string>
 </resources>

@@ -6,8 +6,10 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.*
+import android.net.Uri
 import android.os.Environment
 import android.preference.PreferenceManager
+import android.provider.OpenableColumns
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.EditText
@@ -61,3 +63,12 @@ fun Activity.clipboard(text: String){
 fun qr(text: String, width: Int, height: Int) = QRCodeWriter()
     .encode(text, BarcodeFormat.QR_CODE, width, height, mapOf(EncodeHintType.MARGIN to 0))
     .let{ MatrixToImageWriter.toBitmap(it, MatrixToImageConfig(0xFF000000.toInt(), 0x00000000))}
+
+fun Context.inputStream(uri: Uri) = contentResolver.openInputStream(uri)
+
+fun Context.name(uri: Uri) =
+    if(uri.scheme == "file") uri.lastPathSegment
+    else contentResolver.query(uri, null, null, null, null).run {
+        val index = getColumnIndex(OpenableColumns.DISPLAY_NAME); moveToFirst()
+        getString(index).also{close()}
+    }

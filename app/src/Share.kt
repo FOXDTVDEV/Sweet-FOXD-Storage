@@ -77,7 +77,7 @@ class ShareActivity : ScopedActivity(), FileDialog.OnFileSelectedListener {
 
     fun Intent.handleStream() = UI {
         val uri = getParcelableExtra(EXTRA_STREAM) ?: data
-        title = uri.name
+        title = name(uri)
         val wrapper = wrapperOf(uri)
         askWrap{ wrap -> add(wrapper, wrap) }
     }
@@ -89,18 +89,9 @@ class ShareActivity : ScopedActivity(), FileDialog.OnFileSelectedListener {
         askWrap{ wrap -> add(wrapper, wrap) }
     }
 
-    val Uri.inputStream get() = contentResolver.openInputStream(this)
-
-    val Uri.name: String get() =
-        if(scheme == "file") lastPathSegment
-        else contentResolver.query(this, null, null, null, null).run {
-            val index = getColumnIndex(DISPLAY_NAME); moveToFirst()
-            getString(index).also{close()}
-        }
-
     fun wrapperOf(uri: Uri): ByteArrayWrapper {
-        val bytes = uri.inputStream.readBytes()
-        return ByteArrayWrapper(uri.name, bytes)
+        val bytes = inputStream(uri).readBytes()
+        return ByteArrayWrapper(name(uri), bytes)
     }
 
     fun add(wrapper: NamedStreamable, wrap: kotlin.Boolean) = UI {
@@ -153,10 +144,10 @@ class ShareActivity : ScopedActivity(), FileDialog.OnFileSelectedListener {
             title = publishbtn.text
             customView {
                 scrollView { verticalLayout {
-                    padding = dip(16)
+                    padding = dip(24)
                     keys.forEach { key ->
                         textView(key.name){
-                            textSize = 20f
+                            textSize = 18f
                             onClick {
                                 alert{
                                     message = getString(publish_confirm, key.name)

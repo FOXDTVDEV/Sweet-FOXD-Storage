@@ -9,12 +9,18 @@ import fr.rhaz.ipfs.sweet.menu.infoMenu
 import kotlinx.android.synthetic.main.activity_console.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.okButton
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
 class ConsoleActivity: ScopedActivity() {
 
     override fun onBackPressed() {}
+    override fun onResume() {
+        super.onResume()
+        checkAPI({}){startActivityNoAnimation<MainActivity>()}
+    }
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
@@ -34,9 +40,14 @@ class ConsoleActivity: ScopedActivity() {
                 it.action = ACTION_SEND
                 startActivity(it)
             }
-            111 -> launch(Dispatchers.IO) {
-                val input = FileInputStream(data?.data?.path!!.split(":")[1])
-                val output = FileOutputStream(Daemon.store["/swarm.key"])
+            111 -> UIO {
+                val uri = data?.data
+                    ?: throw Exception("Could not find data")
+                if(!name(uri).endsWith(".key"))
+                    throw Exception("File is not a .key")
+                val input = inputStream(uri)
+                val file = Daemon.store["swarm.key"].apply { createNewFile() }
+                val output = FileOutputStream(file)
                 try{
                     input.copyTo(output)
                 } finally {

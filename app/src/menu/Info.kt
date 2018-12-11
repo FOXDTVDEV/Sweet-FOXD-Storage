@@ -1,9 +1,11 @@
 package fr.rhaz.ipfs.sweet.menu
 
+import android.graphics.Color
 import android.view.Menu
 import android.view.MenuItem
 import android.view.SubMenu
 import android.widget.EditText
+import android.widget.TextView
 import fr.rhaz.ipfs.sweet.*
 import fr.rhaz.ipfs.sweet.R.string.*
 import fr.rhaz.ipfs.sweet.UI
@@ -20,6 +22,11 @@ fun Menu.item(
 ) = add(id).onClick(action)
 
 fun MenuItem.onClick(action: () -> Unit) = setOnMenuItemClickListener{action(); true }
+
+val style = { it: TextView ->
+    it.textColor = Color.BLACK
+    it.isSelectable = true
+}
 
 fun ConsoleActivity.infoMenu() = infobtn.onClick {
     popupMenu(it){
@@ -56,15 +63,33 @@ fun ConsoleActivity.infoMenu() = infobtn.onClick {
                             peers.forEach{ peer ->
                                 val hash = peer.id.toBase58()
                                 textView(hash).onClick {
-                                    alert{
-                                        title = hash
-                                        message = peer.address.toString()
-                                        neutralPressed("Disconnect"){
-                                            UI { IO { Daemon.exec("swarm disconnect ${peer.address}").waitFor() } }
+                                    UI {
+                                        val addresses = IO {
+                                            val result = IPFS().dht.findpeer(peer.id)
+                                            val responses = result["Responses"] as? List<*>
+                                                ?: return@IO emptyList<String>()
+                                            val response = responses[0] as Map<*, *>
+                                            response["Addrs"] as? List<String> ?: emptyList()
+                                        }.filter { it.isNotBlank() }
+                                        alert{
+                                            title = hash
+                                            customView {
+                                                verticalLayout {
+                                                    padding = dip(16)
+                                                    textView("Peer ID")
+                                                    textView("${peer.id}", style)
+                                                    textView("\nLocal address")
+                                                    textView("${peer.address}", style)
+                                                    textView("\nDHT addresses")
+                                                    textView(addresses.joinToString("\n"), style)
+                                                }
+                                            }
+                                            positiveButton("Disconnect"){
+                                                UIO { Daemon.exec("swarm disconnect ${peer.address}").waitFor() }
+                                            }
+                                            closeButton()
+                                            show()
                                         }
-                                        negativeButton(copy){ clipboard(peer.toString()) }
-                                        okButton {  }
-                                        show()
                                     }
                                 }
                             }
@@ -98,15 +123,23 @@ fun ConsoleActivity.infoMenu() = infobtn.onClick {
         item(menu_others){
             UI {
                 val version = IO { IPFS().version() }
-                val addresses = Daemon.config.obj("Addresses")
+                val addresses = silentIO { Daemon.config.obj("Addresses") }
                 alert{
                     title = getString(title_others)
-                    val msgs = mapOf(
-                        others_goipfs_version to version,
-                        others_api_address to addresses.string("API"),
-                        others_gateway_address to addresses.string("Gateway")
-                    ).map { "${getString(it.key)}: ${it.value}" }
-                    message = msgs.joinToString("\n")
+                    customView {
+                        verticalLayout {
+                            padding = dip(16)
+                            mapOf(
+                                others_goipfs_version to version,
+                                others_api_address to addresses.string("API"),
+                                others_gateway_address to addresses.string("Gateway")
+                            ).map {
+                                linearLayout {
+                                    textView(it.key); textView(" "); textView(it.value, style)
+                                }
+                            }
+                        }
+                    }
                     okButton { }
                     show()
                 }

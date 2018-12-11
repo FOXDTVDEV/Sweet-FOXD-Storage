@@ -9,9 +9,7 @@ import android.content.Intent.*
 import android.support.v4.app.FragmentActivity
 import android.view.View
 import android.widget.EditText
-import com.tbruyelle.rxpermissions2.RxPermissions
-import fr.rhaz.ipfs.sweet.R.string.error_title
-import fr.rhaz.ipfs.sweet.R.string.not_impl
+import fr.rhaz.ipfs.sweet.R.string.*
 import org.jetbrains.anko.*
 import org.ligi.tracedroid.TraceDroid
 
@@ -29,14 +27,12 @@ fun Context.send(ex: Exception){
     }
 }
 
-
-
 fun Context.alert(ex: Exception) {
     ex.printStackTrace()
-    alert(ex.message?:""){
+    alert("${ex.javaClass.name}: ${ex.message}"){
         titleResource = error_title
         okButton{ }
-        positiveButton("Send"){ send(ex) }
+        positiveButton(report){ send(ex) }
         show()
     }
 }
@@ -44,12 +40,6 @@ fun Context.alert(ex: Exception) {
 fun Context.notimpl() {
     alert(not_impl){ okButton{} }.show()
 }
-
-fun FragmentActivity.checkPermissions(
-    callback: () -> Unit,
-    error: () -> Unit = {}
-) = RxPermissions(this).request(*permissions)
-        .subscribe{ granted -> if(granted) callback() else error() }
 
 fun View.onClick(action: (View) -> Unit) = setOnClickListener{action(it)}
 
@@ -65,3 +55,14 @@ inline fun AlertBuilder<*>.no(noinline handler: (dialog: DialogInterface) -> Uni
         negativeButton(R.string.no, handler)
 
 fun AlertBuilder<*>.closeButton() = neutralPressed(R.string.close){}
+
+fun AlertBuilder<*>.inputView(builder: EditText.() -> Unit = {}): EditText {
+    lateinit var input: EditText
+    customView {
+        verticalLayout {
+            padding = dip(16)
+            input = editText(builder)
+        }
+    }
+    return input
+}

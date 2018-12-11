@@ -24,6 +24,11 @@ fun <T> T.UI(
     block: suspend CoroutineScope.() -> Unit
 ) where T:Context,T:CoroutineScope = unsafeUI(block).catch(error)
 
+fun <T> T.UIO(
+    error: (Exception) -> Any = ::alert,
+    block: suspend CoroutineScope.() -> Unit
+) where T:Context,T:CoroutineScope = UI(error) { IO(block = block) }
+
 fun CoroutineScope.unsafeUI(block: suspend CoroutineScope.() -> Unit)
     = async(Dispatchers.Main, block = block)
 
@@ -50,7 +55,6 @@ suspend fun <T> Context.IO(
 fun Deferred<*>.catch(
     error: (Exception) -> Any, success: () -> Unit = {}
 ) = invokeOnCompletion {
-    it?.printStackTrace()
     when (it) {
         is Error -> throw it
         is Exception -> error(it)
