@@ -83,4 +83,11 @@
     <string name="share_btn_export">Exporter</string>
     <string name="menu_swarm_key">Clé swarm…</string>
     <string name="error_title">Une erreur est survenue</string>
+    <string name="title_action_pins">%d épingles</string>
+    <string name="loading">Loading...</string>
+    <string name="ask_open_hash">Voulez-vous ouvrir ce hash ?</string>
+    <string name="title_info_peers">%d pairs</string>
+    <string name="key_delete_confirm">Êtes-vous sûr de vouloir supprimer cette clé ?</string>
+    <string name="delete">Supprimer</string>
+    <string name="btn_add_key">Nouvelle</string>
 </resources>

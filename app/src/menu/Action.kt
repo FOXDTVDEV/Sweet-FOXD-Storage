@@ -3,49 +3,44 @@ package fr.rhaz.ipfs.sweet.menu
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.*
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
-import android.text.InputType.TYPE_CLASS_TEXT
-import android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
 import android.view.Menu
 import android.view.View
 import android.widget.EditText
 import android.widget.PopupMenu
-import com.rustamg.filedialogs.OpenFileDialog
 import fr.rhaz.ipfs.sweet.*
 import fr.rhaz.ipfs.sweet.R.string.*
 import kotlinx.android.synthetic.main.activity_console.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import org.jetbrains.anko.*
+import fr.rhaz.ipfs.sweet.UI
+import java.util.*
 
 fun Context.popupMenu(anchor: View, builder: Menu.() -> Unit)
     = PopupMenu(ctx, anchor).apply { menu.apply(builder) }.show()
 
-fun ConsoleActivity.actionMenu() = actionbtn.onClick {
-    popupMenu(it){
+fun ConsoleActivity.actionMenu() = actionbtn.onClick{
+    if(it != null) popupMenu(it){
 
-        add(menu_add_file).onClick {
-            Intent(ACTION_GET_CONTENT).also {
-                it.type = "*/*"
-                val chooser = createChooser(it, getString(title_add_file))
+        item(menu_add_file){
+            Intent(ACTION_GET_CONTENT).apply {
+                type = "*/*"
+                val chooser = createChooser(this, getString(title_add_file))
                 startActivityForResult(chooser, 1)
             }
         }
 
-        add(menu_add_folder).onClick{
-            Intent(ACTION_OPEN_DOCUMENT_TREE).also {
-                it.type = "*/*"
-                val chooser = createChooser(it, getString(title_add_folder))
-                startActivityForResult(chooser, 2)
-            }
-        }
-
-        add(menu_add_text).onClick{
-            alertDialog(title_add_text){
-                val txt = editText{ setView(this) }
-                setCancelable(false)
-                setNegativeButton(getString(cancel)){ d, _ -> }
-                setPositiveButton(apply){ d, _ ->
+        item(menu_add_text){
+            alert{
+                title = getString(title_add_text)
+                isCancelable = false
+                lateinit var txt: EditText
+                customView {
+                    verticalLayout {
+                        txt = editText()
+                        padding = dip(16)
+                    }
+                }
+                cancelButton{}
+                okButton {
                     intent<ShareActivity>().apply {
                         action = ACTION_SEND
                         type = "text/plain"
@@ -53,31 +48,125 @@ fun ConsoleActivity.actionMenu() = actionbtn.onClick {
                         startActivity(this)
                     }
                 }
+                show()
             }
         }
 
-        add(menu_garbage_collect).onClick{
+        item(menu_garbage_collect){
             UI {
                 IO { IPFS().repo.gc() }
-                alertDialog(garbage_collected){
-                    setPositiveButton(close){_,_ ->}
+                alert(garbage_collected){ okButton{} }.show()
+            }
+        }
+
+        item(menu_pins){
+            UI{
+                val pins = Daemon.pins()
+                alert{
+                    title = getString(title_action_pins, pins.size)
+                    customView {
+                        scrollView { verticalLayout {
+                            padding = dip(16)
+                            pins.forEach { pin ->
+                                val hash = pin.toBase58()
+                                textView(hash).onClick {
+                                    alert(ask_open_hash){
+                                        title = hash
+                                        val intent = intent<ShareActivity>{
+                                            action = ACTION_SEND
+                                            putExtra("hash", hash)
+                                        }
+                                        yes { startActivity(intent) }
+                                        no {}
+                                        show()
+                                    }
+                                }
+                            }
+                        } }
+                    }
+                    okButton {}
+                    show()
                 }
             }
         }
 
-        add(menu_pins).onClick(::notimpl)
-        add(menu_keys).onClick(::notimpl)
-        add(menu_pubsub).onClick(::notimpl)
-
-        addSubMenu(menu_swarm).apply {
-            add(menu_swarm_connect).onClick(::notimpl)
-            add(menu_swarm_disconnect).onClick(::notimpl)
+        item(menu_keys){
+            UI {
+                val keys = IO { IPFS().key.list() }
+                alert{
+                    title = getString(menu_keys)
+                    closeButton()
+                    positiveButton(btn_add_key){
+                        alert{
+                            title = getString(btn_add_key)
+                            lateinit var text: EditText
+                            customView {
+                                verticalLayout {
+                                    padding = dip(16)
+                                    text = editText()
+                                }
+                            }
+                            cancelButton {  }
+                            okButton {
+                                UI {
+                                    IO { Daemon.exec("key gen --type=rsa --size=2048 ${text.value}").waitFor() }
+                                }
+                            }
+                            show()
+                        }
+                    }
+                    customView {
+                        scrollView { verticalLayout {
+                            padding = dip(16)
+                            keys.forEach { key ->
+                                val hash = key.id.toBase58()
+                                textView(key.name){
+                                    textSize = 20f
+                                    onClick {
+                                        alert{
+                                            title = hash
+                                            lateinit var text: EditText
+                                            customView {
+                                                verticalLayout {
+                                                    padding = dip(16)
+                                                    text = editText(key.name)
+                                                    if(key.name == "self")
+                                                    text.isEnabled = false
+                                                }
+                                            }
+                                            if(key.name != "self")
+                                            neutralPressed(delete){
+                                                alert(key_delete_confirm){
+                                                    yes {
+                                                        UI { IO { IPFS().key.rm(key.name) } }
+                                                    }
+                                                    no{}
+                                                    show()
+                                                }
+                                            }
+                                            negativeButton(copy){ clipboard(hash) }
+                                            okButton {
+                                                if(key.name != text.value)
+                                                UI { IO { IPFS().key.rename(key.name, text.value)} }
+                                            }
+                                            show()
+                                        }
+                                    }
+                                }
+                            }
+                        } }
+                    }
+                    show()
+                }
+            }
         }
 
-        addSubMenu(menu_dht).apply {
-            add(menu_dht_findpeer).onClick(::notimpl)
-            add(menu_dht_findprovs).onClick(::notimpl)
-            add(menu_dht_query).onClick(::notimpl)
+        item(menu_pubsub, ::notimpl)
+
+        sub(menu_dht) {
+            item(menu_dht_findpeer, ::notimpl)
+            item(menu_dht_findprovs, ::notimpl)
+            item(menu_dht_query, ::notimpl)
         }
     }
 }

@@ -1,21 +1,70 @@
 package fr.rhaz.ipfs.sweet.menu
 
-import android.app.AlertDialog
-import android.content.Intent
 import android.widget.EditText
 import fr.rhaz.ipfs.sweet.*
 import fr.rhaz.ipfs.sweet.R.string.*
 import kotlinx.android.synthetic.main.activity_console.*
+import org.jetbrains.anko.*
+import fr.rhaz.ipfs.sweet.UI
+import fr.rhaz.ipfs.sweet.utils.*
 
 fun ConsoleActivity.configMenu() = configbtn.onClick {
+    popupMenu(it){
+
+        item(menu_bootstrap){
+            UI {
+                val lines = silentIO { Daemon.config.array("Bootstrap").map{it.asString} }
+                alert {
+                    title = getString(menu_bootstrap)
+                    lateinit var text: EditText
+                    customView {
+                        scrollView { verticalLayout {
+                            padding = dip(16)
+                            text = editText(lines.joinToString("\n\n")){
+                                textSize = 14f
+                            }
+                        } }
+                    }
+                    cancelButton {  }
+                    okButton {
+                        UI {
+                            val lines = text.value.split("\n").filter { it.isNotBlank() }
+                            silentIO {
+                                Daemon.config {
+                                    val bootstrap = array("Bootstrap")
+                                    bootstrap.removeAll { true }
+                                    lines.forEach(bootstrap::add)
+                                }
+                            }
+                        }
+                    }
+                    show()
+                }
+            }
+        }
+
+        sub(menu_gateway){
+            item(menu_gateway_writable).apply{
+                isCheckable = true
+                UI {
+                    isChecked = silentIO { Daemon.config.obj("Gateway").boolean("Writable") }
+                }
+                onClick{
+                    UI {
+                        isChecked = !isChecked
+                        silentIO {
+                            Daemon.config{
+                                obj("Gateway").set("Writable", json(isChecked))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
 //    popupMenu(it){
-//        add(getString(menu_bootstrap)).setOnMenuItemClickListener{notimpl()}
-//        addSubMenu(getString(menu_gateway)).apply {
-//            add(getString(menu_gateway_writable)).apply {
-//                isCheckable = true
-//                isChecked = false
-//            }.setOnMenuItemClickListener{notimpl()}
-//        }
 //        addSubMenu(getString(menu_api)).apply {
 //            addSubMenu(getString(menu_api_http_headers)).apply {
 //                add(getString(menu_api_http_headers_addorigin)).setOnMenuItemClickListener {

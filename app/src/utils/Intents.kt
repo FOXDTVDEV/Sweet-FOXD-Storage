@@ -6,8 +6,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.*
+import org.jetbrains.anko.ctx
 
-inline fun <reified T> Context.intent() = Intent(this, T::class.java)
+inline fun <reified T> Context.intent(builder: Intent.() -> Unit = {}) = Intent(this, T::class.java).apply(builder)
 fun Intent.action(value: String) = apply { action = value }
 
 inline fun <reified T: Activity> Context.startActivity() = startActivity(intent<T>())

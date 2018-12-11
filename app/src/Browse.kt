@@ -18,6 +18,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import io.ipfs.multihash.Multihash
 import kotlinx.android.synthetic.main.activity_browse.*
+import org.jetbrains.anko.ctx
 
 class BrowseActivity : ScopedActivity() {
 

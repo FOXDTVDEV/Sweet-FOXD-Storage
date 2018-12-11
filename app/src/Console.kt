@@ -55,18 +55,21 @@ class ConsoleActivity: ScopedActivity() {
     }
 
     fun mkconsole() = input.onWrite {
-        val cmd = input.value
-        input.text.clear()
-        append("> $cmd")
-        launch(Dispatchers.IO) {
-            val process = Daemon.exec(cmd)
-            fun print(line: String) {
-                println(line)
-                unsafeUI { append(line) }
+        UI {
+            val cmd = input.value
+            input.text.clear()
+            append("> $cmd")
+            IO {
+                val process = Daemon.exec(cmd)
+                fun print(line: String) {
+                    println(line)
+                    UI { append(line) }
+                }
+                launch { process.inputStream.reader().forEachLine(::print) }
+                launch { process.errorStream.reader().forEachLine(::print) }
+                process.waitFor()
             }
-            launch { process.inputStream.reader().forEachLine(::print) }
-            launch { process.errorStream.reader().forEachLine(::print) }
-            process.waitFor()
         }
+
     }
 }

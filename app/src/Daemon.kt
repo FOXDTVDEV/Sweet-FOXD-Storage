@@ -49,8 +49,6 @@ class Daemon(val ctx: Context): CoroutineScope {
 
         val act = ctx as? Activity ?: throw Exception("Not an activity")
 
-        val progress = ctx.progress(daemon_installing)
-
         val type = when(val abi = SUPPORTED_ABIS[0]) {
             "arm64-v8a" -> "arm64"
             "x86_64" -> "amd64"
@@ -59,7 +57,7 @@ class Daemon(val ctx: Context): CoroutineScope {
             else -> throw Exception("${ctx.getString(daemon_unsupported_arch)}: $abi")
         }
 
-        IO {
+        ctx.IO(daemon_installing) {
             bin.delete()
             bin.createNewFile()
             val input = act.assets.open(type)
@@ -71,17 +69,13 @@ class Daemon(val ctx: Context): CoroutineScope {
             }
             bin.setExecutable(true)
         }
-
-        progress.dismiss()
     }
 
-    suspend fun init() {
+    suspend fun init() = ctx.apply{
 
-        val progress = ctx.progress(daemon_init)
+        IO(daemon_init) { exec("init").waitFor() }
 
-        IO { exec("init").waitFor() }
-
-        IO {
+        IO{
             config{
                 // Allow webui
                 val headers = obj("API").obj("HTTPHeaders")
@@ -94,27 +88,22 @@ class Daemon(val ctx: Context): CoroutineScope {
                 connmgr.set("GracePeriod", json("40s"))
             }
         }
-
-        progress.dismiss()
     }
 
-    suspend fun start() {
-        ctx as? Activity ?: throw Exception("Not an activity")
+    suspend fun start() = ctx.apply {
+        this as? Activity ?: throw Exception("Not an activity")
 
         ctx.startService<DaemonService>()
-        val progress = ctx.progress(daemon_starting)
 
-        IO {
+        IO(daemon_starting) {
             fun check() =
                 try{ IPFS(); true}
                 catch (ex: Exception){false}
             while(!check()) delay(1000)
         }
-
-        progress.dismiss()
     }
 
-    suspend fun pins() = IO {
+    suspend fun pins() = ctx.IO {
         exec("pin ls").run {
             waitFor()
             val lines = inputStream.reader().readLines()
@@ -155,7 +144,7 @@ class DaemonService: ScopedService() {
             startForeground(1, build())
         }
 
-        thread { daemon = Daemon.exec("daemon") }
+        daemon = Daemon.exec("daemon")
     }
 
     override fun onDestroy() = super.onDestroy().also{

@@ -1,18 +1,18 @@
 package fr.rhaz.ipfs.sweet
 
-import android.app.AlertDialog
 import android.app.Application
-import android.app.ProgressDialog
+import android.app.ProgressDialog.*
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.Intent.*
 import android.support.v4.app.FragmentActivity
-import android.text.InputType
-import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import com.tbruyelle.rxpermissions2.RxPermissions
-import fr.rhaz.ipfs.sweet.R.string.*
+import fr.rhaz.ipfs.sweet.R.string.error_title
+import fr.rhaz.ipfs.sweet.R.string.not_impl
+import org.jetbrains.anko.*
 import org.ligi.tracedroid.TraceDroid
 
 class App : Application() {
@@ -29,18 +29,20 @@ fun Context.send(ex: Exception){
     }
 }
 
+
+
 fun Context.alert(ex: Exception) {
     ex.printStackTrace()
-    alertDialog(error_title, ex.message){
-        setNeutralButton(close){ _,_ -> }
-        setPositiveButton("Send"){ _,_ -> send(ex) }
+    alert(ex.message?:""){
+        titleResource = error_title
+        okButton{ }
+        positiveButton("Send"){ send(ex) }
+        show()
     }
 }
 
 fun Context.notimpl() {
-    alertDialog(not_impl){
-        setPositiveButton(close){_,_ -> }
-    }
+    alert(not_impl){ okButton{} }.show()
 }
 
 fun FragmentActivity.checkPermissions(
@@ -49,46 +51,17 @@ fun FragmentActivity.checkPermissions(
 ) = RxPermissions(this).request(*permissions)
         .subscribe{ granted -> if(granted) callback() else error() }
 
-fun MenuItem.onClick(action: () -> Unit)
-    = setOnMenuItemClickListener { action(); true }
-
 fun View.onClick(action: (View) -> Unit) = setOnClickListener{action(it)}
 
 val EditText.value get() = text.toString()
 
 fun Context.progress(msg: Int)
-    = ProgressDialog(ctx).apply {
-        setMessage(getString(msg))
-        setCancelable(false)
-        show()
-    }
+    = indeterminateProgressDialog(msg) { show() }
 
-fun Context.alertDialog(title: Int, builder: AlertDialog.Builder.() -> Unit = {})
-    = Dialog(title).apply(builder).show()
+inline fun AlertBuilder<*>.yes(noinline handler: (dialog: DialogInterface) -> Unit) =
+        positiveButton(R.string.yes, handler)
 
-fun Context.alertDialog(title: Int, message: String?, builder: AlertDialog.Builder.() -> Unit = {})
-    = Dialog(title).apply { setMessage(message) }.apply(builder).show()
+inline fun AlertBuilder<*>.no(noinline handler: (dialog: DialogInterface) -> Unit) =
+        negativeButton(R.string.no, handler)
 
-fun Context.alertDialog(title: Int, message: String?)
-= alertDialog(title){
-    setMessage(message)
-    setPositiveButton(close){ d, _ -> }
-}
-
-fun Context.editText(builder: EditText.() -> Unit = {})
-= EditText(ctx).apply{
-    inputType = InputType.TYPE_CLASS_TEXT
-    apply(builder)
-}
-
-fun Context.Dialog(title: Int) = AlertDialog.Builder(ctx).apply{ setTitle(title) }
-
-fun Context.inputDialog(title: Int, action: (EditText) -> Unit)
-= alertDialog(title){
-    val input = editText()
-    setView(input)
-    setPositiveButton(apply){ d, _ ->
-        catch(title){ action(input) }
-    }
-    setNegativeButton(cancel){ d, _ -> }
-}
+fun AlertBuilder<*>.closeButton() = neutralPressed(R.string.close){}

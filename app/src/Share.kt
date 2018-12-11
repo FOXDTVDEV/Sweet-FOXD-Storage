@@ -1,26 +1,24 @@
 package fr.rhaz.ipfs.sweet
 
-import android.app.Activity
-import android.app.Activity.*
 import android.app.DialogFragment
-import android.app.DialogFragment.*
-import android.content.Context
+import android.app.ProgressDialog.show
 import android.content.Intent
 import android.content.Intent.*
 import android.net.Uri
 import android.os.Bundle
-import android.provider.OpenableColumns.*
+import android.provider.OpenableColumns.DISPLAY_NAME
 import com.rustamg.filedialogs.FileDialog
-import com.rustamg.filedialogs.FileDialog.*
 import com.rustamg.filedialogs.SaveFileDialog
 import fr.rhaz.ipfs.sweet.R.layout.activity_share
 import fr.rhaz.ipfs.sweet.R.string.*
-import fr.rhaz.ipfs.sweet.R.style.*
+import fr.rhaz.ipfs.sweet.R.style.AppTheme
 import io.ipfs.api.MerkleNode
 import io.ipfs.api.NamedStreamable
-import io.ipfs.api.NamedStreamable.*
+import io.ipfs.api.NamedStreamable.ByteArrayWrapper
+import io.ipfs.api.NamedStreamable.DirWrapper
 import io.ipfs.multihash.Multihash
 import kotlinx.android.synthetic.main.activity_share.*
+import org.jetbrains.anko.*
 import java.io.File
 
 class ShareActivity : ScopedActivity(), FileDialog.OnFileSelectedListener {
@@ -43,9 +41,10 @@ class ShareActivity : ScopedActivity(), FileDialog.OnFileSelectedListener {
             Daemon.all()
             process()
         }
-        alertDialog(daemon_not_running) {
-            setNeutralButton(close) { _, _ -> finish() }
-            setPositiveButton(start) { _, _ -> start() }
+        alert(daemon_not_running) {
+            neutralPressed(close){ finish() }
+            positiveButton(start) { start() }
+            show()
         }
     }
 
@@ -59,10 +58,12 @@ class ShareActivity : ScopedActivity(), FileDialog.OnFileSelectedListener {
     }
 
     fun askWrap(then: (Boolean) -> Unit){
-        alertDialog(share_wrap) {
-            setCancelable(false)
-            setPositiveButton(yes){ _, _ -> then(true) }
-            setNegativeButton(no){ _, _ -> then(false) }
+        alert {
+            title = getString(share_wrap)
+            isCancelable = false
+            yes { then(true) }
+            no { then(false) }
+            show()
         }
     }
 
@@ -103,7 +104,7 @@ class ShareActivity : ScopedActivity(), FileDialog.OnFileSelectedListener {
     }
 
     fun add(wrapper: NamedStreamable, wrap: kotlin.Boolean) = UI {
-        val progress = ctx.progress(share_on_ipfs)
+        val progress = progress(share_on_ipfs)
         val hash = IO {
             var i: List<MerkleNode>? = null
             while(i == null)
@@ -142,12 +143,41 @@ class ShareActivity : ScopedActivity(), FileDialog.OnFileSelectedListener {
             pinbtn.text = getString(share_btn_pin)
 
         pinbtn.onClick{ pin(hash) }
-        publishbtn.onClick{notimpl()}
+        publishbtn.onClick{ publish(hash) }
         exportbtn.onClick{ export(hash) }
     }
 
     fun publish(hash: Multihash) = UI {
-
+        val keys = IO { IPFS().key.list() }
+        alert{
+            title = publishbtn.text
+            customView {
+                scrollView { verticalLayout {
+                    padding = dip(16)
+                    keys.forEach { key ->
+                        textView(key.name){
+                            textSize = 20f
+                            onClick {
+                                alert{
+                                    message = getString(publish_confirm, key.name)
+                                    title = publishbtn.text
+                                    no{}
+                                    yes {
+                                        UI {
+                                            IO(publishing) { Daemon.exec("name publish --key=${key.name} $hash").waitFor() }
+                                            alert("Published!"){closeButton()}.show()
+                                        }
+                                    }
+                                    show()
+                                }
+                            }
+                        }
+                    }
+                } }
+            }
+            neutralPressed(close){}
+            show()
+        }
     }
 
     fun pin(hash: Multihash) = UI {
