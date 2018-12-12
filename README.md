@@ -41,11 +41,11 @@ At the current point, battery and network usage depends a lot on your phone and 
 
 ### Download 📲
 
-Minimum Android version: 4.4 (KitKat) (API 19)
+Minimum Android version: 5.0 (Lollipop) (API 21)
 
 - #### [Google Play (Beta)](https://play.google.com/store/apps/details?id=fr.rhaz.ipfs.sweet)
 
-- [Development build APK](https://github.com/RHazDev/Sweet-IPFS/raw/master/app/apk/sweetipfs-0.1.4-debug.apk)
+- [Development build APK](https://github.com/RHazDev/Sweet-IPFS/raw/master/app/apk/sweetipfs-0.2-debug.apk)
 
 ### Final Features (not 100% implemented)
 - It can start a new IPFS node or connect to an already running IPFS node
@@ -62,7 +62,7 @@ Minimum Android version: 4.4 (KitKat) (API 19)
 - It is a fork of **IPFSDroid** by ligi
 - It uses **go-ipfs** (updated regularly) for the daemon and the command-line interface
 - It uses the **java-ipfs-api** (not the kotlin-ipfs-api used by IPFSDroid) for other actions
-- It targets Android **KitKat** (4.4) (API 19)
+- It targets Android **Lollipop** (5.0) (API 21)
 - The IPFS logo belongs to IPFS, I just used it
 
 ### Join us!
