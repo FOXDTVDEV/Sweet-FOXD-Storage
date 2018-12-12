@@ -26,6 +26,7 @@ import io.ipfs.multihash.Multihash
 import net.glxn.qrgen.android.MatrixToImageConfig
 import net.glxn.qrgen.android.MatrixToImageWriter
 import org.jetbrains.anko.alert
+import org.jetbrains.anko.clipboardManager
 import java.io.File
 import java.lang.Exception
 
@@ -56,8 +57,7 @@ fun Context.catch(title: Int = error_title, callback: () -> Unit){
 }
 
 fun Activity.clipboard(text: String){
-    val clipboard = getSystemService(AppCompatActivity.CLIPBOARD_SERVICE) as ClipboardManager
-    clipboard.primaryClip = ClipData.newPlainText("text", text)
+    clipboardManager.primaryClip = ClipData.newPlainText("text", text)
 }
 
 fun qr(text: String, width: Int, height: Int) = QRCodeWriter()

@@ -97,7 +97,7 @@ fun ConsoleActivity.configMenu() = configbtn.onClick {
         item(menu_swarm_key){
             val intent = Intent(ACTION_GET_CONTENT).setType("*/*")
             val chooser = createChooser(intent, "Select your swarm.key file")
-            startActivityForResult(chooser, 111)
+            startActivityForResult(chooser, 3)
         }
 
         sub(menu_experimental){

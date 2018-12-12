@@ -3,6 +3,8 @@ package fr.rhaz.ipfs.sweet.menu
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.*
+import android.net.Uri
+import android.text.SpannableString
 import android.view.Menu
 import android.view.View
 import android.widget.PopupMenu
@@ -11,6 +13,7 @@ import fr.rhaz.ipfs.sweet.R.string.*
 import kotlinx.android.synthetic.main.activity_console.*
 import org.jetbrains.anko.*
 import fr.rhaz.ipfs.sweet.UI
+
 
 fun Context.popupMenu(anchor: View, builder: Menu.() -> Unit)
     = PopupMenu(ctx, anchor).apply { menu.apply(builder) }.show()
@@ -40,6 +43,25 @@ fun ConsoleActivity.actionMenu() = actionbtn.onClick{
                 }
                 show()
             }
+        }
+
+        item(menu_action_open_clipboard){ UI {
+            val input = clipboardManager.primaryClip.getItemAt(0)
+            val uri = input.uri ?: Uri.parse(input.text.toString())
+            val res = IPXSResource(uri)
+            if(!res.valid) throw Exception("IPXS resource not valid")
+            intent<ShareActivity>().apply {
+                action = ACTION_SEND
+                putExtra("hash", res.hash!!.toBase58())
+                putExtra("scheme", res.type)
+                startActivity(this)
+            }
+        } }
+
+        item(menu_action_open_file){
+            val intent = Intent(ACTION_GET_CONTENT).setType("*/*")
+            val chooser = createChooser(intent, getString(menu_action_open_file))
+            startActivityForResult(chooser, 2)
         }
 
         item(menu_garbage_collect){
@@ -86,10 +108,10 @@ fun ConsoleActivity.actionMenu() = actionbtn.onClick{
                 alert{
                     title = getString(menu_keys)
                     closeButton()
-                    positiveButton(btn_add_key){
+                    positiveButton(_new){
                         alert{
-                            title = getString(btn_add_key)
-                            val input = inputView()
+                            title = getString(title_add_key)
+                            val input = inputView{hint = getString(name)}
                             cancelButton {  }
                             okButton {
                                 UI {
@@ -123,7 +145,15 @@ fun ConsoleActivity.actionMenu() = actionbtn.onClick{
                                                     show()
                                                 }
                                             }
-                                            negativeButton(copy){ clipboard(hash) }
+                                            negativeButton(open){
+                                                intent<ShareActivity>().apply {
+                                                    action = ACTION_VIEW
+                                                    putExtra("hash", key.id.toBase58())
+                                                    putExtra("scheme", "ipns")
+                                                    putExtra("name", key.name)
+                                                    startActivity(this)
+                                                }
+                                            }
                                             okButton {
                                                 if(key.name != input.value)
                                                 UIO { IPFS().key.rename(key.name, input.value) }

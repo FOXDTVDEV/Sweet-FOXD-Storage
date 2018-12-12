@@ -5,8 +5,6 @@ import android.content.Intent.*
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment.getExternalStorageDirectory
-import android.provider.DocumentsContract
-import android.provider.DocumentsContract.Document.*
 import fr.rhaz.ipfs.sweet.R.layout.activity_share
 import fr.rhaz.ipfs.sweet.R.string.*
 import io.ipfs.api.MerkleNode
@@ -21,12 +19,13 @@ class ShareActivity : ScopedActivity() {
 
     override fun onCreate(state: Bundle?){
         super.onCreate(state)
-
         if(intent.hasExtra("hash")){
             val hash = intent.getStringExtra("hash")
-            Multihash(hash).show()
+            val scheme = intent.getStringExtra("scheme") ?: "ipfs"
+            val name = intent.getStringExtra("name")
+            if(name != null) title = name
+            Multihash(hash).show(scheme)
         }
-
         else UI { checkAPI() }
     }
 
@@ -100,27 +99,27 @@ class ShareActivity : ScopedActivity() {
             i.last().hash
         }
         progress.dismiss()
-        hash.show()
+        hash.show("ipfs")
     }
 
-    fun Multihash.show() = UI {
+    fun Multihash.show(scheme: String) = UI {
         setContentView(activity_share)
         layout.onClick { it.requestFocus() }
 
         val hash = this@show
-        val url = "https://ipfs.io/ipfs/$hash"
+        val url = "https://ipfs.io/$scheme/$hash"
         qrimg.setImageBitmap(qr(url, 400, 400))
 
         hashtxt.apply {
-            text = "$hash"
+            text = "/$scheme/$hash"
             var index = 0
             val switch = {
                 text = when(++index % 5){
                     1 -> url
-                    2 -> "ipfs://$hash"
-                    3 -> "/ipfs/$hash"
+                    2 -> "$scheme://$hash"
+                    3 -> "http://localhost:8080/$scheme/$hash"
                     4 -> "https://webui.ipfs.io/#/explore/$hash"
-                    else -> "$hash"
+                    else -> "/$scheme/$hash"
                 }
             }
             onClick { switch() }
@@ -131,7 +130,7 @@ class ShareActivity : ScopedActivity() {
 
         pinbtn.onClick{ pin(hash) }
         publishbtn.onClick{ publish(hash) }
-        exportbtn.onClick{ export(hash) }
+        exportbtn.onClick{ export(hash, scheme) }
     }
 
     fun publish(hash: Multihash) = UI {
@@ -178,7 +177,7 @@ class ShareActivity : ScopedActivity() {
         }
     }
 
-    fun export(hash: Multihash) = UI {
+    fun export(hash: Multihash, scheme: String) = UI {
         val sdcard = getExternalStorageDirectory()
         val folder = sdcard["IPFS"].apply { mkdir() }
         alert{
@@ -186,7 +185,7 @@ class ShareActivity : ScopedActivity() {
             val input = inputView{ hint = getString(filename) }
             okButton {
                 UI{
-                    val file = folder["${input.value}.ipfs"]
+                    val file = folder["${input.value}.$scheme"]
                     IO{
                         file.createNewFile()
                         file.writeText(hash.toBase58())

@@ -1,5 +1,6 @@
 package fr.rhaz.ipfs.sweet
 
+import android.app.Activity
 import android.app.Application
 import android.app.ProgressDialog.*
 import android.content.Context
@@ -27,11 +28,13 @@ fun Context.send(ex: Exception){
     }
 }
 
-fun Context.alert(ex: Exception) {
+fun Context.alert(ex: Exception) = alert(ex){}
+fun Activity.alertFinish(ex: Exception) = alert(ex){finish()}
+fun Context.alert(ex: Exception, then: () -> Unit = {}) {
     ex.printStackTrace()
-    alert("${ex.javaClass.name}: ${ex.message}"){
+    alert("${ex.message} (${ex.javaClass.simpleName})"){
         titleResource = error_title
-        okButton{ }
+        closeButton{then()}
         positiveButton(report){ send(ex) }
         show()
     }
@@ -54,7 +57,7 @@ inline fun AlertBuilder<*>.yes(noinline handler: (dialog: DialogInterface) -> Un
 inline fun AlertBuilder<*>.no(noinline handler: (dialog: DialogInterface) -> Unit) =
         negativeButton(R.string.no, handler)
 
-fun AlertBuilder<*>.closeButton() = neutralPressed(R.string.close){}
+fun AlertBuilder<*>.closeButton(action: (DialogInterface) -> Unit = {}) = neutralPressed(R.string.close, action)
 
 fun AlertBuilder<*>.inputView(builder: EditText.() -> Unit = {}): EditText {
     lateinit var input: EditText

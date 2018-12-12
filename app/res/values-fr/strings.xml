@@ -85,7 +85,7 @@
     <string name="title_info_peers">%d pairs</string>
     <string name="key_delete_confirm">Êtes-vous sûr de vouloir supprimer cette clé ?</string>
     <string name="delete">Supprimer</string>
-    <string name="btn_add_key">Nouvelle</string>
+    <string name="title_add_key">Nouvelle clé</string>
     <string name="connecting">Connexion…</string>
     <string name="menu_api_headers_origins">Origines</string>
     <string name="publish_confirm">Êtes-vous sûr de vouloir publier sur %s ?</string>
@@ -95,4 +95,9 @@
     <string name="menu_experimental_p2phttpproxy">Proxy P2P-HTTP</string>
     <string name="exported">Exporté dans %s</string>
     <string name="filename">Nom du fichier</string>
+    <string name="menu_action_open_clipboard">Ouvrir à partir du presse-papier</string>
+    <string name="menu_action_open_file">Ouvrir à partir d\'un fichier</string>
+    <string name="open">Ouvrir</string>
+    <string name="_new">Nouvelle</string>
+    <string name="name">Nom</string>
 </resources>

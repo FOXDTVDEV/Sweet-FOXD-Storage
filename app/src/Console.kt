@@ -2,6 +2,7 @@ package fr.rhaz.ipfs.sweet
 
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
+import android.net.Uri
 import android.os.Bundle
 import fr.rhaz.ipfs.sweet.menu.actionMenu
 import fr.rhaz.ipfs.sweet.menu.configMenu
@@ -40,7 +41,24 @@ class ConsoleActivity: ScopedActivity() {
                 it.action = ACTION_SEND
                 startActivity(it)
             }
-            111 -> UIO {
+            2 -> UI {
+                val uri = data?.data ?: throw Exception("Could not find data")
+                val extension = name(uri).takeLast(5)
+                val scheme = when(extension){
+                    ".ipfs", ".ipns" -> extension.drop(1)
+                    else -> throw Exception("File is not a .ipfs/.ipns")
+                }
+                val text = inputStream(uri).reader().readText()
+                Multihash(text) ?: throw Exception("$text is not a valid multihash")
+                intent<ShareActivity>().apply {
+                    action = ACTION_SEND
+                    putExtra("hash", text)
+                    putExtra("scheme", scheme)
+                    putExtra("name", name(uri))
+                    startActivity(this)
+                }
+            }
+            3 -> UIO {
                 val uri = data?.data
                     ?: throw Exception("Could not find data")
                 if(!name(uri).endsWith(".key"))
@@ -81,6 +99,5 @@ class ConsoleActivity: ScopedActivity() {
                 process.waitFor()
             }
         }
-
     }
 }
