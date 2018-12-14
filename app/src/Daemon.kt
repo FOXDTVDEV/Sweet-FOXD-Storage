@@ -73,9 +73,9 @@ class Daemon(val ctx: Context): CoroutineScope {
 
     suspend fun init() = ctx.apply{
 
-        IO(daemon_init) { exec("init").waitFor() }
+        IO(daemon_init) {
+            exec("init").waitFor()
 
-        IO{
             config{
                 // Allow webui
                 val headers = obj("API").obj("HTTPHeaders")
