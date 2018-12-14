@@ -34,7 +34,7 @@ fun ConsoleActivity.infoMenu() = infobtn.onClick {
         sub(menu_identity){
 
             item(menu_identity_peerid){
-                val id = Daemon.config.obj("Identity").string("PeerID")
+                val id = Daemon.config.obj("Identity").string("PeerID")!!
                 alert(id, getString(title_peerid)){
                     closeButton()
                     positiveButton(copy){ clipboard(id) }
@@ -43,7 +43,7 @@ fun ConsoleActivity.infoMenu() = infobtn.onClick {
             }
 
             item(menu_identity_privatekey){
-                val key = Daemon.config.obj("Identity").string("PrivKey")
+                val key = Daemon.config.obj("Identity").string("PrivKey")!!
                 alert(key, getString(title_privatekey)) {
                     positiveButton(copy){ clipboard(key) }
                     closeButton()

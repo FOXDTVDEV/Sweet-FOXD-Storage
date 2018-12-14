@@ -107,4 +107,7 @@
     <string name="open">Open</string>
     <string name="_new">New</string>
     <string name="name">Name</string>
+    <string name="notif_low_power">Low power</string>
+    <string name="notif_high_power">High power</string>
+    <string name="menu_config_args">Daemon arguments</string>
 </resources>

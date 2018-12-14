@@ -17,7 +17,7 @@ fun ConsoleActivity.configMenu() = configbtn.onClick {
     fun Menu.switch(res: Int, key: String, accessor: JsonObject.() -> JsonObject){
         item(res).apply{
             isCheckable = true
-            UI { isChecked = silentIO { Daemon.config.accessor().boolean(key) } }
+            UI { isChecked = silentIO { Daemon.config.accessor().boolean(key) ?: false } }
             onClick{ UI {
                 isChecked = !isChecked
                 silentIO {
@@ -28,6 +28,23 @@ fun ConsoleActivity.configMenu() = configbtn.onClick {
     }
 
     popupMenu(it){
+
+        item(menu_config_args){
+            UI{
+                val args = silentIO{ Daemon.config.obj("Sweet").string("Args") ?: "" }
+                alert{
+                    title = getString(menu_config_args)
+                    val input = inputView{setText(args.replace(" ", "\n"))}
+                    cancelButton {  }
+                    okButton { UIO{
+                        Daemon.config {
+                            obj("Sweet").set("Args", json(input.value.replace("\n", " ")))
+                        }
+                    } }
+                    show()
+                }
+            }
+        }
 
         item(menu_bootstrap){
             UI {

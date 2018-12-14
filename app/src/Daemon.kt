@@ -9,18 +9,15 @@ import android.graphics.Color.*
 import android.os.Build.*
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
-import android.util.Log
 import com.google.gson.*
+import fr.rhaz.ipfs.sweet.R.drawable.ic_battery
 import fr.rhaz.ipfs.sweet.R.drawable.notificon
 import fr.rhaz.ipfs.sweet.R.string.*
-import fr.rhaz.ipfs.sweet.utils.array
-import fr.rhaz.ipfs.sweet.utils.json
-import fr.rhaz.ipfs.sweet.utils.obj
-import fr.rhaz.ipfs.sweet.utils.set
+import fr.rhaz.ipfs.sweet.utils.*
 import kotlinx.coroutines.*
+import org.jetbrains.anko.toast
 import java.io.FileReader
 import java.lang.Runtime.*
-import kotlin.concurrent.thread
 
 val Context.Daemon get() = Daemon(this)
 
@@ -77,15 +74,15 @@ class Daemon(val ctx: Context): CoroutineScope {
             exec("init").waitFor()
 
             config{
+                obj("Sweet").apply {
+                    val def = json("--enable-pubsub-experiment --enable-namesys-pubsub")
+                    string("Args") ?: set("Args", def)
+                }
                 // Allow webui
                 val headers = obj("API").obj("HTTPHeaders")
                 val origins = headers.array("Access-Control-Allow-Origin")
                 val webui = json("https://webui.ipfs.io")
                 if(webui !in origins) origins.add(webui)
-
-                // Reduce CPU usage
-                val connmgr = obj("Swarm").obj("ConnMgr")
-                connmgr.set("GracePeriod", json("40s"))
             }
         }
     }
@@ -122,9 +119,6 @@ class DaemonService: ScopedService() {
     override fun onCreate() {
         super.onCreate()
 
-        val exit = pendingService(intent<DaemonService>().action("STOP"))
-        val open = pendingActivity<MainActivity>()
-
         if (VERSION.SDK_INT >= VERSION_CODES.O)
             NotificationChannel("sweetipfs", "Sweet IPFS", IMPORTANCE_MIN).apply {
                 description = "Sweet IPFS"
@@ -132,19 +126,55 @@ class DaemonService: ScopedService() {
                 .createNotificationChannel(this)
             }
 
-        NotificationCompat.Builder(this, "sweetipfs").run {
-            setOngoing(true)
-            color = parseColor("#4b9fa2")
-            setSmallIcon(notificon)
-            setShowWhen(false)
-            setContentTitle(getString(notif_title))
-            setContentText(getString(notif_msg))
-            setContentIntent(open)
-            addAction(ic_menu_close_clear_cancel, getString(stop), exit)
-            startForeground(1, build())
-        }
+        notif.highPower()
+    }
 
-        daemon = Daemon.exec("daemon --enable-pubsub-experiment --enable-namesys-pubsub")
+    fun start() {
+        val args = Daemon.config.obj("Sweet").string("Args")
+        daemon = Daemon.exec("daemon $args")
+    }
+
+    val notif get() = NotificationCompat.Builder(this, "sweetipfs").apply {
+        setOngoing(true)
+        color = parseColor("#4b9fa2")
+        setSmallIcon(notificon)
+        setShowWhen(false)
+        setContentTitle(getString(notif_title))
+        val open = pendingActivity<MainActivity>()
+        setContentIntent(open)
+        val exit = pendingService(intent<DaemonService>().action("STOP"))
+        addAction(ic_menu_close_clear_cancel, getString(stop), exit)
+    }
+
+    fun NotificationCompat.Builder.lowPower(){
+        setContentText(getString(notif_msg))
+        val highPower = pendingService(intent<DaemonService>().action("HIGH-POWER"))
+        addAction(ic_battery, getString(notif_high_power), highPower)
+        startForeground(1, build())
+        if(::daemon.isInitialized) daemon.destroy()
+        Daemon.config {
+            val connmgr = obj("Swarm").obj("ConnMgr")
+            // Reduce CPU usage
+            connmgr.set("GracePeriod", json("80s"))
+            // Reduce RAM usage
+            connmgr.set("LowWater", json(20))
+            connmgr.set("HighWater", json(100))
+        }
+        start()
+    }
+
+    fun NotificationCompat.Builder.highPower() {
+        val lowPower = pendingService(intent<DaemonService>().action("LOW-POWER"))
+        addAction(ic_battery, getString(notif_low_power), lowPower)
+        startForeground(1, build())
+        if(::daemon.isInitialized) daemon.destroy()
+        Daemon.config {
+            val connmgr = obj("Swarm").obj("ConnMgr")
+            connmgr.set("GracePeriod", json("20s"))
+            connmgr.set("LowWater", json(600))
+            connmgr.set("HighWater", json(900))
+        }
+        start()
     }
 
     override fun onDestroy() = super.onDestroy().also{
@@ -154,6 +184,10 @@ class DaemonService: ScopedService() {
 
     override fun onStartCommand(i: Intent?, f: Int, id: Int) = START_STICKY.also{
         super.onStartCommand(i, f, id)
-        i?.action?.takeIf{it == "STOP"}?.also{stopSelf()}
+        when(i?.action){
+            "STOP" -> stopSelf()
+            "LOW-POWER" -> notif.lowPower()
+            "HIGH-POWER" -> notif.highPower()
+        }
     }
 }
