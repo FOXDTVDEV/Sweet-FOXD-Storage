@@ -109,5 +109,8 @@
     <string name="name">Name</string>
     <string name="notif_low_power">Low power</string>
     <string name="notif_high_power">High power</string>
-    <string name="menu_config_args">Daemon arguments</string>
+    <string name="menu_config_args">Arguments</string>
+    <string name="err_file_not_ipfs">File is not a .ipfs/.ipns</string>
+    <string name="err_not_a_hash">%s is not a valid multihash</string>
+    <string name="err_no_data">Could not find data</string>
 </resources>

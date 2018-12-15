@@ -140,6 +140,7 @@ class DaemonService: ScopedService() {
         setSmallIcon(notificon)
         setShowWhen(false)
         setContentTitle(getString(notif_title))
+        setContentText(getString(notif_msg))
         val open = pendingActivity<MainActivity>()
         setContentIntent(open)
         val exit = pendingService(intent<DaemonService>().action("STOP"))
@@ -147,7 +148,6 @@ class DaemonService: ScopedService() {
     }
 
     fun NotificationCompat.Builder.lowPower(){
-        setContentText(getString(notif_msg))
         val highPower = pendingService(intent<DaemonService>().action("HIGH-POWER"))
         addAction(ic_battery, getString(notif_high_power), highPower)
         startForeground(1, build())

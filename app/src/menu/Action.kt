@@ -49,7 +49,7 @@ fun ConsoleActivity.actionMenu() = actionbtn.onClick{
             val input = clipboardManager.primaryClip.getItemAt(0)
             val uri = input.uri ?: Uri.parse(input.text.toString())
             val res = IPXSResource(uri)
-            if(!res.valid) throw Exception("IPXS resource not valid")
+            if(!res.valid) throw Exception(browser_not_ipxs)
             intent<ShareActivity>().apply {
                 action = ACTION_SEND
                 putExtra("hash", res.hash!!.toBase58())
@@ -67,7 +67,7 @@ fun ConsoleActivity.actionMenu() = actionbtn.onClick{
         item(menu_garbage_collect){
             UI {
                 IO { IPFS().repo.gc() }
-                alert(garbage_collected){ okButton{} }.show()
+                alert(garbage_collected, menu_garbage_collect){ okButton{} }.show()
             }
         }
 

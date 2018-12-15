@@ -102,5 +102,8 @@
     <string name="name">Nom</string>
     <string name="notif_high_power">Mode intensif</string>
     <string name="notif_low_power">Mode économie</string>
-    <string name="menu_config_args">Arguments du daemon</string>
+    <string name="menu_config_args">Arguments</string>
+    <string name="err_file_not_ipfs">Ce n\'est pas un fichier .ipfs/.ipns</string>
+    <string name="err_no_data">Données non trouvées</string>
+    <string name="err_not_a_hash">%d n\'est pas un hash valide</string>
 </resources>

@@ -4,6 +4,8 @@ import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.net.Uri
 import android.os.Bundle
+import fr.rhaz.ipfs.sweet.R.layout.*
+import fr.rhaz.ipfs.sweet.R.string.*
 import fr.rhaz.ipfs.sweet.menu.actionMenu
 import fr.rhaz.ipfs.sweet.menu.configMenu
 import fr.rhaz.ipfs.sweet.menu.infoMenu
@@ -25,7 +27,7 @@ class ConsoleActivity: ScopedActivity() {
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
-        setContentView(R.layout.activity_console)
+        setContentView(activity_console)
         mkconsole()
         actionMenu()
         infoMenu()
@@ -42,14 +44,14 @@ class ConsoleActivity: ScopedActivity() {
                 startActivity(it)
             }
             2 -> UI {
-                val uri = data?.data ?: throw Exception("Could not find data")
+                val uri = data?.data ?: throw Exception(err_no_data)
                 val extension = name(uri).takeLast(5)
                 val scheme = when(extension){
                     ".ipfs", ".ipns" -> extension.drop(1)
-                    else -> throw Exception("File is not a .ipfs/.ipns")
+                    else -> throw Exception(err_file_not_ipfs)
                 }
                 val text = inputStream(uri).reader().readText()
-                Multihash(text) ?: throw Exception("$text is not a valid multihash")
+                Multihash(text) ?: throw Exception(getString(err_not_a_hash, text))
                 intent<ShareActivity>().apply {
                     action = ACTION_SEND
                     putExtra("hash", text)
