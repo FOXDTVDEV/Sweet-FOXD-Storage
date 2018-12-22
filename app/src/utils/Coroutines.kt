@@ -5,7 +5,6 @@ import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import fr.rhaz.ipfs.sweet.R.string.loading
 import kotlinx.coroutines.*
-import org.jetbrains.anko.custom.async
 
 abstract class ScopedService: Service(), CoroutineScope{
     private val job = SupervisorJob()

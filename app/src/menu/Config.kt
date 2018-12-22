@@ -1,16 +1,17 @@
 package fr.rhaz.ipfs.sweet.menu
 
 import android.content.Intent
-import android.content.Intent.*
+import android.content.Intent.ACTION_GET_CONTENT
+import android.content.Intent.createChooser
 import android.view.Menu
-import android.widget.EditText
 import com.google.gson.JsonObject
 import fr.rhaz.ipfs.sweet.*
 import fr.rhaz.ipfs.sweet.R.string.*
-import kotlinx.android.synthetic.main.activity_console.*
-import org.jetbrains.anko.*
-import fr.rhaz.ipfs.sweet.UI
 import fr.rhaz.ipfs.sweet.utils.*
+import kotlinx.android.synthetic.main.activity_console.*
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.cancelButton
+import org.jetbrains.anko.okButton
 
 fun ConsoleActivity.configMenu() = configbtn.onClick {
 
@@ -51,7 +52,7 @@ fun ConsoleActivity.configMenu() = configbtn.onClick {
                 val lines = silentIO { Daemon.config.array("Bootstrap").map{it.asString} }
                 alert {
                     title = getString(menu_bootstrap)
-                    val input = inputView{
+                    val input = inputView(menu_bootstrap_hint){
                         setText(lines.joinToString("\n\n"))
                         textSize = 14f
                     }
@@ -74,6 +75,19 @@ fun ConsoleActivity.configMenu() = configbtn.onClick {
         }
 
         sub(menu_gateway){
+            item(menu_gateway_public){ UI {
+                val value = silentIO{Daemon.config.obj("Sweet").obj("Gateway").string("Public")}
+                alert{
+                    title = getString(menu_gateway_public)
+                    val input = inputView(menu_gateway_public_hint) { setText(value) }
+                    okButton { UI { silentIO {
+                        Daemon.config {
+                            obj("Sweet").obj("Gateway").set("Public", json(input.value))
+                        }
+                    } } }
+                    show()
+                }
+            } }
             switch(menu_gateway_writable, "Writable"){obj("Gateway")}
         }
 

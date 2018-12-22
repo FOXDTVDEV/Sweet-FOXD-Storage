@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="button_run_daemon">Démarrer le noeud</string>
     <string name="menu_config">Config</string>
     <string name="menu_action">Action</string>
     <string name="menu_info">Info</string>
     <string name="console_hello">Connecté ! Entrez une commande ou naviguez dans les menus :)</string>
-    <string name="could_not_connect">Impossible de se connecter</string>
     <string name="tap_to_switch">Tapotez pour intervertir</string>
     <string name="select_to_show_actions">Selectionnez pour afficher les actions</string>
     <string name="browser_show">Afficher</string>
@@ -106,4 +104,16 @@
     <string name="err_file_not_ipfs">Ce n\'est pas un fichier .ipfs/.ipns</string>
     <string name="err_no_data">Données non trouvées</string>
     <string name="err_not_a_hash">%d n\'est pas un hash valide</string>
+    <string name="menu_bootstrap_hint">Votre noeud va se connecter à ces addresses au démarrage</string>
+    <string name="menu_gateway_public">Passerelle publique</string>
+    <string name="menu_gateway_public_hint">Vous pouvez choisir votre passerelle favorite, qui sera utilisé dans les QR codes et dans les liens</string>
+    <string name="peer_connect">Connexion</string>
+    <string name="peer_disconnect">Déconnexion</string>
+    <string name="main_progress">Embarquement en cours</string>
+    <string name="main_message">En route vers la lune !</string>
+    <string name="main_settings_delete_storage">Effacer le stockage</string>
+    <string name="main_settings_delete_storage_confirmation">Êtes-vous sûr de vouloir supprimer toutes vos données IPFS ?</string>
+    <string name="main_settings_init_args">Arguments de l\'initialisation</string>
+    <string name="main_settings_start_args">Arguments du démarrage</string>
+    <string name="settings">Paramètres</string>
 </resources>

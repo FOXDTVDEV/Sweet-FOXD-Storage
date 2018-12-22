@@ -59,11 +59,12 @@ inline fun AlertBuilder<*>.no(noinline handler: (dialog: DialogInterface) -> Uni
 
 fun AlertBuilder<*>.closeButton(action: (DialogInterface) -> Unit = {}) = neutralPressed(R.string.close, action)
 
-fun AlertBuilder<*>.inputView(builder: EditText.() -> Unit = {}): EditText {
+fun AlertBuilder<*>.inputView(hint: Int = 0, builder: EditText.() -> Unit = {}): EditText {
     lateinit var input: EditText
     customView {
         verticalLayout {
             padding = dip(16)
+            if(hint != 0) textView(hint)
             input = editText(builder)
         }
     }

@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.os.Environment.getExternalStorageDirectory
 import fr.rhaz.ipfs.sweet.R.layout.activity_share
 import fr.rhaz.ipfs.sweet.R.string.*
+import fr.rhaz.ipfs.sweet.utils.obj
+import fr.rhaz.ipfs.sweet.utils.string
 import io.ipfs.api.MerkleNode
 import io.ipfs.api.NamedStreamable
 import io.ipfs.api.NamedStreamable.ByteArrayWrapper
@@ -33,14 +35,14 @@ class ShareActivity : ScopedActivity() {
 
     fun checkAPI() = checkAPI(::process) {
         fun start() = UI {
-            Daemon.all()
+            IO { Daemon.all()}
             process()
         }
-        alert(daemon_not_running) {
+        UI { alert(daemon_not_running) {
             neutralPressed(close){ finish() }
             positiveButton(start) { start() }
             show()
-        }
+        } }
     }
 
     fun Intent.parse() = when(action) {
@@ -107,7 +109,8 @@ class ShareActivity : ScopedActivity() {
         layout.onClick { it.requestFocus() }
 
         val hash = this@show
-        val url = "https://ipfs.io/$scheme/$hash"
+        val gateway = silentIO{Daemon.config.obj("Sweet").obj("Gateway").string("Public")}
+        val url = gateway + "$scheme/$hash"
         qrimg.setImageBitmap(qr(url, 400, 400))
 
         hashtxt.apply {
