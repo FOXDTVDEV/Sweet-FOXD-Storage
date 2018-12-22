@@ -26,7 +26,11 @@ class Daemon(val ctx: Context): CoroutineScope {
     override val coroutineContext get() = Dispatchers.Main + job
 
     val store get() = ctx.getExternalFilesDir(null)!!["ipfs"]
+    val initialized get() = store.exists()
+
     val bin get() = ctx.filesDir["ipfsbin"]
+    val installed get() = bin.exists()
+
     val config get() = JsonParser().parse(FileReader(store["config"])).asJsonObject
 
     fun exec(cmd: String) = getRuntime().exec(
@@ -42,7 +46,7 @@ class Daemon(val ctx: Context): CoroutineScope {
 
     suspend fun all(){ install(); init(); start() }
 
-    suspend fun install() {
+    suspend fun install() = ctx.apply{
 
         val act = ctx as? Activity ?: throw Exception("Not an activity")
 
@@ -54,7 +58,7 @@ class Daemon(val ctx: Context): CoroutineScope {
             else -> throw Exception("${ctx.getString(daemon_unsupported_arch)}: $abi")
         }
 
-        ctx.IO(daemon_installing) {
+        silentIO {
             bin.delete()
             bin.createNewFile()
             val input = act.assets.open(type)
@@ -68,15 +72,16 @@ class Daemon(val ctx: Context): CoroutineScope {
         }
     }
 
-    suspend fun init() = ctx.apply{
+    suspend fun init(args: String = "") = ctx.apply{
 
-        IO(daemon_init) {
-            exec("init").waitFor()
+        silentIO {
+            exec("init $args").waitFor()
 
             config{
                 obj("Sweet").apply {
-                    val def = json("--enable-pubsub-experiment --enable-namesys-pubsub")
-                    string("Args") ?: set("Args", def)
+                    obj("Gateway").apply {
+                        string("Public") ?: set("Public", json("https://ipfs.io/"))
+                    }
                 }
                 // Allow webui
                 val headers = obj("API").obj("HTTPHeaders")
@@ -87,12 +92,16 @@ class Daemon(val ctx: Context): CoroutineScope {
         }
     }
 
-    suspend fun start() = ctx.apply {
+    suspend fun start(args: String = "") = ctx.apply {
         this as? Activity ?: throw Exception("Not an activity")
 
-        ctx.startService<DaemonService>()
+        silentIO {
+            config{ obj("Sweet").set("Args", json(args)) }
+        }
 
-        IO(daemon_starting) {
+        startService<DaemonService>()
+
+        silentIO {
             fun check() =
                 try{ IPFS(); true}
                 catch (ex: Exception){false}
@@ -155,10 +164,10 @@ class DaemonService: ScopedService() {
         Daemon.config {
             val connmgr = obj("Swarm").obj("ConnMgr")
             // Reduce CPU usage
-            connmgr.set("GracePeriod", json("80s"))
+            connmgr.set("GracePeriod", json("1m0s"))
             // Reduce RAM usage
             connmgr.set("LowWater", json(20))
-            connmgr.set("HighWater", json(100))
+            connmgr.set("HighWater", json(40))
         }
         start()
     }

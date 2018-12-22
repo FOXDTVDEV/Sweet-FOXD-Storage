@@ -84,7 +84,7 @@ fun ConsoleActivity.infoMenu() = infobtn.onClick {
                                                     textView(addresses.joinToString("\n"), style)
                                                 }
                                             }
-                                            positiveButton("Disconnect"){
+                                            positiveButton(peer_disconnect){
                                                 UIO { Daemon.exec("swarm disconnect ${peer.address}").waitFor() }
                                             }
                                             closeButton()
@@ -95,7 +95,7 @@ fun ConsoleActivity.infoMenu() = infobtn.onClick {
                             }
                         } }
                     }
-                    negativeButton("Connect"){
+                    negativeButton(peer_connect){
                         alert{
                             title = getString(menu_swarm_connect)
                             lateinit var text: EditText
