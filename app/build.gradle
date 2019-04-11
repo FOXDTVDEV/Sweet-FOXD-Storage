@@ -1,15 +1,79 @@
+plugins {
+    id "de.undercouch.download" version "3.4.3"
+}
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+
+def static compileUrl(def version, def arch) {
+    return "https://dist.ipfs.io/go-ipfs/${version}/go-ipfs_${version}_linux-${arch}.tar.gz"
+}
+
+def static compileFilename(def version, def arch) {
+    return "go-ipfs_${version}_linux-${arch}.tar.gz"
+}
+
+def static compileDestName(def name) {
+    return "${name}"
+}
+
+task downloadIPFSBinaries {
+    doLast {
+        def ipfsVers = "v0.4.19"
+        def supportedArchList = ["arm", "arm64", "386", "amd64"]
+        def destDir = "./assets"
+        supportedArchList.each {
+            def dstFile = new File(destDir, it)
+            if (!dstFile.exists()) {
+                def tempFile = new File(buildDir, compileFilename(ipfsVers, it))
+                println tempFile
+                def url = compileUrl(ipfsVers, it)
+                try {
+                    download {
+                        src url
+                        dest tempFile
+                        overwrite false
+                    }
+                } catch(Exception e) {
+                    println e
+                    throw e
+                }
+                def destName = compileDestName(it)
+                println destName
+                copy {
+                    from(tarTree(resources.gzip(tempFile))) {
+                        include "go-ipfs/ipfs"
+                        eachFile { fcd ->
+                            fcd.relativePath = new RelativePath(true, fcd.relativePath.segments.drop(1))
+                        }
+                        includeEmptyDirs = false
+                    }
+                    into destDir
+                    rename "ipfs", destName
+                }
+            }
+        }
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name.equals('assembleRelease')) {
+        task.dependsOn downloadIPFSBinaries
+    }
+    else if (task.name.equals('assembleDebug')) {
+        task.dependsOn downloadIPFSBinaries
+    }
+}
+
+
 android {
     compileSdkVersion 27
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     defaultConfig {
         applicationId "fr.rhaz.ipfs.sweet"
         minSdkVersion 21
