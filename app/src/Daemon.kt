@@ -54,7 +54,7 @@ class Daemon(val ctx: Context): CoroutineScope {
             "arm64-v8a" -> "arm64"
             "x86_64" -> "amd64"
             "armeabi", "armeabi-v7a" -> "arm"
-            "386" -> "386"
+            "x86", "386" -> "386"
             else -> throw Exception("${ctx.getString(daemon_unsupported_arch)}: $abi")
         }
 
