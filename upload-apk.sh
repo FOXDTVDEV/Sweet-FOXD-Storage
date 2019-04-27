@@ -1,27 +1,17 @@
 #!/bin/bash
 
-#create a new directory that will contain out generated apk
-mkdir $HOME/apk/
+mkdir $HOME/android/
+cp -R app/build/outputs/apk/*.apk $HOME/android/
 
-#copy generated apk from build folder to the folder just created
-cp -R app/build/outputs/apk/debug/app-debug.apk $HOME/apk/
-
-#go to home and setup git
 cd $HOME
-git config --global user.email "useremail@domain.com"
-git config --global user.name "Your Name"
+git config --global user.email "hazae41@gmail.com"
+git config --global user.name "Haz"
 
-#clone the repository in the buildApk folder
-git clone --quiet --branch=dev https://hazae41:$GITHUB_API_KEY@github.com/hazae41/sweet-ipfs dev > /dev/null
+git clone --depth=10 --branch=dev  https://hazae41:$GITHUB_API_KEY@github.com/hazae41/sweet-ipfs  dev > /dev/null
+cd dev
+cp -Rf $HOME/android/* .
 
-#go into directory and copy data we're interested
-cd dev  cp -Rf $HOME/apk/* .
-
-#add, commit and push files
-git add -f .
-git remote rm origin
-git remote add origin https:/hazae41:$GITHUB_API_KEY@github.com/hazae41/sweet-ipfs.git
-git add -f .
+git add -A
 git commit -m "Travis build $TRAVIS_BUILD_NUMBER pushed"
 git push -fq origin dev > /dev/null
-echo -e "Published APK"
+echo "Published APK"
