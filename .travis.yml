@@ -19,4 +19,5 @@ before_install:
   - gradle -v
 
 after_success:
+  - chmod -x ./upload-apk.sh
   - ./upload-apk.sh
