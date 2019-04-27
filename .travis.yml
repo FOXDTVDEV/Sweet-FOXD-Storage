@@ -15,6 +15,9 @@ before_install:
   - export PATH=$GRADLE_HOME/bin:$PATH
   - gradle -v
 
+script:
+  - gradle build
+
 after_success:
   - sh set_tags.sh
 
@@ -22,7 +25,7 @@ deploy:
   provider: releases
   api_key:
     secure: $GITHUB_API_KEY
-  file: "app/build/outputs/apk/app-release-unsigned.apk"
+  file: "app/build/outputs/apk/release/app-release-unsigned.apk"
   file_glob: "true"
   skip_cleanup: true
   on:
