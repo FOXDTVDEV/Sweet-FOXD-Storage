@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #create a new directory that will contain out generated apk
 mkdir $HOME/buildApk/
 
