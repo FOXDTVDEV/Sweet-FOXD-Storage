@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #create a new directory that will contain out generated apk
-mkdir $HOME/buildApk/
+mkdir $HOME/apk/
 
 #copy generated apk from build folder to the folder just created
-cp -R app/build/outputs/apk/debug/app-debug.apk $HOME/android/
+cp -R app/build/outputs/apk/debug/app-debug.apk $HOME/apk/
 
 #go to home and setup git
 cd $HOME
@@ -15,7 +15,7 @@ git config --global user.name "Your Name"
 git clone --quiet --branch=dev https://hazae41:$GITHUB_API_KEY@github.com/hazae41/sweet-ipfs dev > /dev/null
 
 #go into directory and copy data we're interested
-cd dev  cp -Rf $HOME/android/* .
+cd dev  cp -Rf $HOME/apk/* .
 
 #add, commit and push files
 git add -f .
