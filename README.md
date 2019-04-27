@@ -1,0 +1,1 @@
+[![Build Status](https://travis-ci.com/hazae41/sweet-ipfs.svg?branch=dev)](https://travis-ci.com/hazae41/sweet-ipfs)
