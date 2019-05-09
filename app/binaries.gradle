@@ -1,0 +1,35 @@
+tasks.whenTaskAdded { task ->
+    if(task.name in ['assembleRelease', 'assembleDebug'])
+        task.dependsOn downloadIPFSBinaries
+}
+
+task downloadIPFSBinaries {
+    doLast {
+        def version = "v0.4.20"
+        def archs = ["arm", "arm64", "386", "amd64"]
+        def assets = "./src/main/assets"
+        def getFile = { arch -> "go-ipfs_${version}_linux-${arch}.tar.gz" }
+        def getUrl = { arch ->  "https://dist.ipfs.io/go-ipfs/${version}/go-ipfs_${version}_linux-${arch}.tar.gz" }
+
+        archs.each { arch ->
+            println "Downloading ${arch} binary..."
+            def archive = new File(buildDir, getFile(arch))
+            download {
+                src getUrl(arch)
+                dest archive
+                overwrite true
+            }
+            copy {
+                from(tarTree(resources.gzip(archive))) {
+                    include "go-ipfs/ipfs"
+                    eachFile { file ->
+                        file.relativePath = new RelativePath(true, file.relativePath.segments.drop(1))
+                    }
+                    includeEmptyDirs = false
+                }
+                into assets
+                rename "ipfs", arch
+            }
+        }
+    }
+}
