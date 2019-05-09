@@ -12,7 +12,6 @@ task downloadIPFSBinaries {
         def getUrl = { arch ->  "https://dist.ipfs.io/go-ipfs/${version}/go-ipfs_${version}_linux-${arch}.tar.gz" }
 
         archs.each { arch ->
-            println "Downloading ${arch} binary..."
             def archive = new File(buildDir, getFile(arch))
             download {
                 src getUrl(arch)
