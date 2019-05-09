@@ -1,15 +1,16 @@
 [![Build Status](https://travis-ci.com/hazae41/sweet-ipfs.svg?branch=dev)](https://travis-ci.com/hazae41/sweet-ipfs)
 
 <h3 align="center">
-    <img src="https://i.imgur.com/YM1XneZ.png"/>
+    <img src="https://i.imgur.com/UuRBE5l.png"/>
     <br>
-    :earth_africa: Full IPFS node for Android :earth_africa:
+    Sweet IPFS
+    <br>
+    <h4 align="center">:earth_africa: IPFS for Android & ChromeOS :earth_africa:</h4>
     <br><br><br>
     <a href="https://play.google.com/store/apps/details?id=fr.rhaz.ipfs.sweet"><img src="http://ligi.de/img/play_badge.png"/></a>
 </h3>
 
-
-[![](https://i.imgur.com/dhxagpE.png)](https://steemit.com/ipfs/@hazae41/sweet-ipfs-full-ipfs-node-for-android#upvote_button)
+[![](https://i.imgur.com/6E8x886.png)](https://i.imgur.com/DqFTrkB.jpg)
 
 <hr>
 
