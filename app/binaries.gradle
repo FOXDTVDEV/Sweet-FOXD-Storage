@@ -6,7 +6,7 @@ tasks.whenTaskAdded { task ->
 task downloadIPFSBinaries {
     doLast {
         def version = "v0.4.20"
-        def archs = ["arm", "arm64", "386", "amd64"]
+        def archs = ["arm", "386"]
         def assets = "./src/main/assets"
         def getFile = { arch -> "go-ipfs_${version}_linux-${arch}.tar.gz" }
         def getUrl = { arch ->  "https://dist.ipfs.io/go-ipfs/${version}/go-ipfs_${version}_linux-${arch}.tar.gz" }

@@ -10,7 +10,10 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
+import java.io.InterruptedIOException
 
 operator fun File.get(path: String) = File(this, path)
 
@@ -51,4 +54,14 @@ fun JsonObject.array(key: String): JsonArray {
 fun JsonObject.obj(key: String): JsonObject {
     if (key !in keySet()) set(key, JsonObject())
     return getAsJsonObject(key)
+}
+
+fun Process.read() {
+    listOf(inputStream, errorStream).forEach {
+        stream -> GlobalScope.launch {
+            try{
+                stream.bufferedReader().forEachLine { println(it) }
+            } catch(ex: InterruptedIOException){}
+        }
+    }
 }

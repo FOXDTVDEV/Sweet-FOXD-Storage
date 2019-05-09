@@ -4,32 +4,36 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_MIN
 import android.app.Service
+import android.content.Context
+import android.content.Context.*
 import android.content.Intent
 import android.graphics.Color.parseColor
 import android.os.Build
+import android.os.Build.CPU_ABI
 import android.os.Build.SUPPORTED_ABIS
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import java.io.File
 import java.io.FileReader
+import java.io.InterruptedIOException
 import java.lang.Runtime.getRuntime
+import androidx.core.content.ContextCompat.getSystemService
 
-class DaemonService : Service(), CoroutineScope {
-    private val job = SupervisorJob()
-    override val coroutineContext get() = Dispatchers.IO + job
+
+
+class DaemonService : Service() {
 
     override fun onBind(intent: Intent) = null
 
     var daemon: Process? = null
 
     val store get() = getExternalFilesDir(null)!!["ipfs"]
-    val bin get() = filesDir["ipfsbin"]
+    val bin get() = baseContext.filesDir["goipfs"]
 
     val config get() = JsonParser().parse(FileReader(store["config"])).asJsonObject
 
@@ -55,30 +59,25 @@ class DaemonService : Service(), CoroutineScope {
                     .createNotificationChannel(this)
             }
 
-        launch {
-            if (!bin.exists()) install().join()
-            start().join()
-            startForeground(1, notification.build())
-        }
+        install()
+        start()
+        startForeground(1, notification.build())
     }
 
-    fun install() = launch {
-        var type: String? = null
-        for (abi in SUPPORTED_ABIS) {
-            if (type != null) break
-            type = when (abi) {
-                "arm64-v8a" -> "arm64"
-                "x86_64" -> "amd64"
-                "armeabi", "armeabi-v7a" -> "arm"
-                "x86", "386" -> "386"
-                else -> null
+    fun install() {
+
+        val type = CPU_ABI.let {
+            when{
+                it.startsWith("arm") -> "arm"
+                it.startsWith("x86") -> "386"
+                else ->  throw Exception("Unsupported ABI")
             }
         }
 
-        if (type == null) throw Exception("Unsupported ABI")
-
-        bin.delete()
-        bin.createNewFile()
+        bin.apply {
+            delete()
+            createNewFile()
+        }
 
         val input = assets.open(type)
         val output = bin.outputStream()
@@ -90,12 +89,14 @@ class DaemonService : Service(), CoroutineScope {
         }
 
         bin.setExecutable(true)
+        println("Installed binary")
     }
 
-    fun start() = launch {
-        val init = exec("init")
-        init.read()
-        init.waitFor()
+    fun start() {
+        exec("init").apply {
+            read()
+            waitFor()
+        }
 
         config {
             val headers = obj("API").obj("HTTPHeaders")
@@ -104,31 +105,48 @@ class DaemonService : Service(), CoroutineScope {
             if (webui !in origins) origins.add(webui)
         }
 
-        val daemon = exec("daemon")
-        this@DaemonService.daemon = daemon
-        daemon.read()
+        exec("daemon").apply {
+            daemon = this
+            read()
+        }
     }
 
-    fun Process.read() {
-        launch {
-            inputStream.bufferedReader().forEachLine { println(it) }
-        }
-        launch {
-            errorStream.bufferedReader().forEachLine { println(it) }
-        }
+    fun stop() {
+        daemon?.destroy()
+        daemon = null
     }
+
+    val notificationBuilder = NotificationCompat.Builder(this, "sweetipfs")
 
     val notification
-        get() = NotificationCompat.Builder(this, "sweetipfs").apply {
+        get() = notificationBuilder.apply {
+            mActions.clear()
             setOngoing(true)
+            setOnlyAlertOnce(true)
             color = parseColor("#69c4cd")
             setSmallIcon(R.drawable.ic_cloud)
             setShowWhen(false)
             setContentTitle("Sweet IPFS")
-            setContentText("IPFS is running")
 
             val open = pendingActivity<WebActivity>()
             setContentIntent(open)
+
+            if(daemon == null){
+                setContentText("IPFS is not running")
+
+                val start = pendingService(intent<DaemonService>().action("start"))
+                addAction(R.drawable.ic_cloud, "start", start)
+            }
+
+            else {
+                setContentText("IPFS is running")
+
+                val restart = pendingService(intent<DaemonService>().action("restart"))
+                addAction(R.drawable.ic_cloud, "restart", restart)
+
+                val stop = pendingService(intent<DaemonService>().action("stop"))
+                addAction(R.drawable.ic_cloud, "stop", stop)
+            }
 
             val exit = pendingService(intent<DaemonService>().action("exit"))
             addAction(R.drawable.ic_cloud, "exit", exit)
@@ -137,15 +155,15 @@ class DaemonService : Service(), CoroutineScope {
     override fun onStartCommand(i: Intent?, f: Int, id: Int) = START_STICKY.also {
         super.onStartCommand(i, f, id)
         when (i?.action) {
-            "start" -> {
+            "start" -> start()
+            "stop" -> stop()
+            "restart" -> {
+                stop(); start()
             }
-            "exit" -> stopSelf()
+            "exit" -> System.exit(0)
         }
-    }
-
-    override fun onDestroy() = super.onDestroy().also {
-        daemon?.destroy()
-        NotificationManagerCompat.from(this).cancel(1)
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.notify(1, notification.build())
     }
 
 }
