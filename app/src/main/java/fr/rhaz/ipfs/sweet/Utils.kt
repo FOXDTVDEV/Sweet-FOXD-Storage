@@ -6,14 +6,29 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
+import com.google.gson.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileReader
 import java.io.InterruptedIOException
+import java.lang.Runtime.getRuntime
+
+val Context.store get() = getExternalFilesDir(null)!!["ipfs"]
+val Context.bin get() = filesDir["goipfs"]
+val Context.config get() = JsonParser().parse(FileReader(store["config"])).asJsonObject
+
+fun Context.config(consumer: JsonObject.() -> Unit) {
+    val config = config.apply(consumer)
+    val data = GsonBuilder().setPrettyPrinting().create().toJson(config)
+    store["config"].writeBytes(data.toByteArray())
+}
+
+
+fun Context.exec(cmd: String) = getRuntime().exec(
+    "${bin.absolutePath} $cmd",
+    arrayOf("IPFS_PATH=${store.absolutePath}")
+)
 
 operator fun File.get(path: String) = File(this, path)
 
@@ -56,11 +71,11 @@ fun JsonObject.obj(key: String): JsonObject {
     return getAsJsonObject(key)
 }
 
-fun Process.read() {
+fun Process.read(consumer: (String) -> Unit) {
     listOf(inputStream, errorStream).forEach {
         stream -> GlobalScope.launch {
             try{
-                stream.bufferedReader().forEachLine { println(it) }
+                stream.bufferedReader().forEachLine { consumer(it) }
             } catch(ex: InterruptedIOException){}
         }
     }

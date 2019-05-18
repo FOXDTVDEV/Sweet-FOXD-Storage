@@ -1,5 +1,6 @@
 package fr.rhaz.ipfs.sweet
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_MIN
@@ -30,24 +31,10 @@ class DaemonService : Service() {
 
     override fun onBind(intent: Intent) = null
 
-    var daemon: Process? = null
-
-    val store get() = getExternalFilesDir(null)!!["ipfs"]
-    val bin get() = baseContext.filesDir["goipfs"]
-
-    val config get() = JsonParser().parse(FileReader(store["config"])).asJsonObject
-
-    fun config(consumer: JsonObject.() -> Unit) {
-        val config = config.apply(consumer)
-        val data = GsonBuilder().setPrettyPrinting().create().toJson(config)
-        store["config"].writeBytes(data.toByteArray())
+    companion object{
+        var daemon: Process? = null
+        var logs: MutableList<String> = mutableListOf()
     }
-
-
-    fun exec(cmd: String) = getRuntime().exec(
-        "${bin.absolutePath} $cmd",
-        arrayOf("IPFS_PATH=${store.absolutePath}")
-    )
 
     override fun onCreate() {
         super.onCreate()
@@ -93,21 +80,37 @@ class DaemonService : Service() {
     }
 
     fun start() {
+        logs.clear()
+
         exec("init").apply {
-            read()
+            read{ logs.add(it) }
             waitFor()
         }
 
         config {
-            val headers = obj("API").obj("HTTPHeaders")
-            val origins = headers.array("Access-Control-Allow-Origin")
-            val webui = json("https://webui.ipfs.io")
-            if (webui !in origins) origins.add(webui)
+            obj("API").obj("HTTPHeaders").apply {
+                array("Access-Control-Allow-Origin").also { origins ->
+                    val webui = json("https://sweetipfswebui.netlify.com")
+                    val local = json("http://127.0.0.1:5001")
+                    if (webui !in origins) origins.add(webui)
+                    if (local !in origins) origins.add(local)
+                }
+
+                array("Access-Control-Allow-Methods").also { methods ->
+                    val put = json("PUT")
+                    val get = json("GET")
+                    val post = json("POST")
+                    if(put !in methods) methods.add(put)
+                    if(get !in methods) methods.add(get)
+                    if(post !in methods) methods.add(post)
+                }
+            }
+
         }
 
         exec("daemon").apply {
             daemon = this
-            read()
+            read{ logs.add(it) }
         }
     }
 
@@ -119,6 +122,7 @@ class DaemonService : Service() {
     val notificationBuilder = NotificationCompat.Builder(this, "sweetipfs")
 
     val notification
+        @SuppressLint("RestrictedApi")
         get() = notificationBuilder.apply {
             mActions.clear()
             setOngoing(true)
