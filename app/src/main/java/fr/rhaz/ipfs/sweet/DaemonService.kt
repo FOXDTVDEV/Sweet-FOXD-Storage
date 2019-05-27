@@ -25,8 +25,6 @@ import java.io.InterruptedIOException
 import java.lang.Runtime.getRuntime
 import androidx.core.content.ContextCompat.getSystemService
 
-
-
 class DaemonService : Service() {
 
     override fun onBind(intent: Intent) = null
@@ -134,6 +132,7 @@ class DaemonService : Service() {
 
             val open = pendingActivity<WebActivity>()
             setContentIntent(open)
+            addAction(R.drawable.ic_cloud, "Open", open)
 
             if(daemon == null){
                 setContentText("IPFS is not running")
