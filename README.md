@@ -8,6 +8,8 @@
     <a href="https://play.google.com/store/apps/details?id=fr.rhaz.ipfs.sweet"><img src="http://ligi.de/img/play_badge.png"/></a>
 </h3>
 
+[Join the BETA on Play Store](https://play.google.com/apps/testing/fr.rhaz.ipfs.sweet)
+
 [![](https://i.imgur.com/6E8x886.png)](https://i.imgur.com/DqFTrkB.jpg)
 
 <hr>
