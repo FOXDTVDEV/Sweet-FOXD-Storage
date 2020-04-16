@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Sweet IPFS</string>
+    <string name="channel_id">node</string>
+    <string name="channel_name">Sweet IPFS</string>
+    <string name="channel_description">Sweet IPFS</string>
+    <string name="notification_title">Sweet IPFS</string>
+    <string name="notification_started">IPFS is running in the background</string>
+    <string name="notification_stopped">IPFS is not running</string>
+    <string name="notification_unsupported">Your CPU is not supported</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_start">Start</string>
+    <string name="notification_installing">Installing IPFS…</string>
+    <string name="notification_error">An error occurred</string>
+    <string name="action_exit">Exit</string>
+    <string name="notification_starting">IPFS is starting…</string>
+    <string name="action_purge">Purge</string>
+    <string name="notification_purge">Purging will delete all your files</string>
+    <string name="action_open">Open</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="action_back">Back</string>
+    <string name="toast_no_activity">Could not open your intent</string>
+    <string name="action_logs">Logs</string>
+    <string name="action_dismiss">OK</string>
+</resources>
