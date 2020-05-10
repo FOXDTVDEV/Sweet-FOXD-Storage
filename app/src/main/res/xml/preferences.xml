@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+<PreferenceCategory  app:iconSpaceReserved="false" android:title="Connection settings">
+
+    <EditTextPreference
+        android:icon="@drawable/ic_link"
+        android:key="api"
+        android:iconSpaceReserved="false"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        app:useSimpleSummaryProvider="true"
+        android:title="Custom API address" />
+
+</PreferenceCategory>
+
+</PreferenceScreen>
