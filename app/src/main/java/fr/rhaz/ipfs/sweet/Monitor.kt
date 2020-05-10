@@ -10,23 +10,28 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.preference.PreferenceManager
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.Parameters
 import com.github.kittinunf.fuel.coroutines.awaitString
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
-fun String?.or(other: String) = if(isNullOrBlank()) other else this
+fun String?.or(other: String) = if (isNullOrBlank()) other else this
 
 class Monitor : Service() {
-    val preferences get() = PreferenceManager.getDefaultSharedPreferences(this)
-    val API get() = Uri.parse(preferences.getString("api", null).or("http://127.0.0.1:5001"))
 
-    var timer: Timer? = null
+    val preferences by lazy {
+        PreferenceManager.getDefaultSharedPreferences(this)
+    }
+
+    val API get() = Uri.parse(preferences.getString("api", null).or("http://127.0.0.1:5001"))
+    val interval get() = preferences.getInt("interval", 1)
+
+    var paused = false
 
     val notifier
         get() = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -47,7 +52,7 @@ class Monitor : Service() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        when(intent.action){
+        when (intent.action) {
             "open" -> open()
             "settings" -> settings()
             "pause" -> pause()
@@ -57,7 +62,7 @@ class Monitor : Service() {
         return START_STICKY
     }
 
-    fun open()  {
+    fun open() {
         val uri = Uri.withAppendedPath(API, "webui")
 
         val intent = CustomTabsIntent.Builder()
@@ -68,7 +73,7 @@ class Monitor : Service() {
         intent.launchUrl(this, uri)
     }
 
-    fun settings(){
+    fun settings() {
         val intent = Intent(this, Settings::class.java)
         intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
@@ -90,18 +95,11 @@ class Monitor : Service() {
         return id
     }
 
-    suspend fun post(path: String) = Fuel.post(Uri.withAppendedPath(API, "api/v0/$path").toString()).awaitString()
-
-    fun start(){
-        timer = Timer()
-        timer?.schedule(object : TimerTask(){
-            override fun run() { update() }
-        }, 0, 1000)
-    }
+    suspend fun post(path: String, parameters: Parameters? = null) =
+        Fuel.post(Uri.withAppendedPath(API, "api/v0/$path").toString(), parameters).awaitString()
 
     fun pause() {
-        timer?.cancel()
-        timer = null
+        paused = true
 
         val notification = Notification.Builder(this@Monitor, channel())
             .setOngoing(true)
@@ -113,11 +111,27 @@ class Monitor : Service() {
             .setContentTitle("Paused")
             .setContentText("Monitoring is paused")
             .addAction(R.drawable.ic_notification, "Resume", intent("start"))
+            .addAction(R.drawable.ic_notification, "Settings", intent("settings"))
 
         startForeground(1, notification.build())
     }
 
+    fun start() {
+        paused = false
+        update()
+    }
+
+    fun schedule() {
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                update()
+            }
+        }, (interval * 1000).toLong())
+    }
+
     fun update() = GlobalScope.launch(Main) {
+        if (paused) return@launch
+
         val notification = Notification.Builder(this@Monitor, channel())
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -126,6 +140,7 @@ class Monitor : Service() {
             .setSmallIcon(R.drawable.ic_notification)
             .setColor(getColor(R.color.colorAccent))
             .addAction(R.drawable.ic_notification, "Pause", intent("pause"))
+            .addAction(R.drawable.ic_notification, "Settings", intent("settings"))
 
         try {
             val (version, peers, ratein, rateout) = withContext(IO) {
@@ -142,18 +157,19 @@ class Monitor : Service() {
                 .setContentText("v$version • $peers peers • $ratein / $rateout Mbps")
                 .setContentIntent(intent("open"))
 
-        } catch(e: JSONException){
-            println(e.message)
-            notification
-                .setContentTitle("An error occured")
-                .setContentText(e.message)
-        } catch(e: FuelError){
+        } catch (e: FuelError) {
             notification
                 .setContentTitle("Not connected")
                 .setContentText("Tap to open settings")
                 .setContentIntent(intent("settings"))
+        } catch (e: Exception) {
+            println(e.message)
+            notification
+                .setContentTitle("An error occured")
+                .setContentText(e.message)
         }
 
         startForeground(1, notification.build())
+        if (!paused) schedule()
     }
 }

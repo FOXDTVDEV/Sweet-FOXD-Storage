@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Sweet IPFS</string>
+    <string name="help">
+If you want to install an IPFS node, you can install the Termux app and execute the following commands:\n
+pkg install ipfs\n
+ipfs init\n
+\n
+This will install and initialize a new IPFS node.\n
+You can then start it using the following command:\n
+ipfs daemon\n
+    </string>
 </resources>
