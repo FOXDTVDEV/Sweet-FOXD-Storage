@@ -62,8 +62,8 @@ class Monitor : Service() {
         return START_STICKY
     }
 
-    fun open() {
-        val uri = Uri.withAppendedPath(API, "webui")
+    fun open(path: String = "") {
+        val uri = Uri.withAppendedPath(API, "webui/$path")
 
         val intent = CustomTabsIntent.Builder()
             .setToolbarColor(getColor(R.color.colorPrimaryDark))
@@ -95,8 +95,10 @@ class Monitor : Service() {
         return id
     }
 
+    fun pathOf(path: String) = Uri.withAppendedPath(API, "api/v0/$path").toString()
+
     suspend fun post(path: String, parameters: Parameters? = null) =
-        Fuel.post(Uri.withAppendedPath(API, "api/v0/$path").toString(), parameters).awaitString()
+        Fuel.post(pathOf(path), parameters).awaitString()
 
     fun pause() {
         paused = true
@@ -158,6 +160,7 @@ class Monitor : Service() {
                 .setContentIntent(intent("open"))
 
         } catch (e: FuelError) {
+            println(e.message)
             notification
                 .setContentTitle("Not connected")
                 .setContentText("Tap to open settings")
