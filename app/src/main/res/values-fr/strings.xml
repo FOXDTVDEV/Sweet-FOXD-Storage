@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+        <string name="help">
+Si vous voulez installer un noeud IPFS sur votre appareil, vous pouvez installer l\'application Termux et exécuter les commandes suivantes:\n
+pkg install ipfs\n
+ipfs init\n
+\n
+Un nouveau noeud IPFS va s\'installer et s\'initialiser.\n
+Vous pouvez ensuite le démarrer en utilisant la commande suivante:\n
+ipfs daemon\n
+    </string>
+    <string name="settings_api_title">Adresse personnalisée de l\'API</string>
+    <string name="settings_webui_title">Adresse personnalisée de la WebUI</string>
+    <string name="settings_lowpower_title">Mode basse consommation</string>
+    <string name="settings_interval_title">Intervalle de suivi</string>
+    <string name="settings_interval_summary">Secondes à attendre entre chaque requête</string>
+    <string name="settings_category_connection">Paramètres de connexion</string>
+    <string name="settings_category_power">Paramètres de consommation</string>
+    <string name="process_text">Ouvrir avec Sweet IPFS</string>
+    <string name="settings_state_connected">Connecté à go-ipfs v%1$s</string>
+    <string name="settings_state_disconnected">Pas connecté</string>
+    <string name="settings_restart_required">Merci de redémarrer votre noeud pour appliquer les changement</string>
+    <string name="notification_sub">Suivi</string>
+    <string name="notification_title_paused">En pause</string>
+    <string name="notification_content_paused">Le suivi est en pause</string>
+    <string name="notification_action_resume">Reprendre</string>
+    <string name="notification_action_settings">Paramètres</string>
+    <string name="notification_action_pause">Pause</string>
+    <string name="notification_title_connected">Connecté</string>
+    <string name="notification_content_connected">v%1$s • %2$s pairs • %3$s / %4$s Mbps</string>
+    <string name="notification_title_disconnected">Pas connecté</string>
+    <string name="notification_content_disconnected">Appuyez ici pour ouvrir les paramètres</string>
+    <string name="notification_title_error">Une erreur est survenue</string>
+    <string name="settings_lowpower_summary">Réduit la charge de travail des services sur le système. Peut affecter la fonctionnalité du nœud - les performances de la découverte de contenu et de la récupération de données peuvent être dégradées.</string>
+</resources>

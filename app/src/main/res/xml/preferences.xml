@@ -4,38 +4,42 @@
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
-        android:title="Connection settings">
+        android:title="@string/settings_category_connection">
 
         <EditTextPreference
             android:key="api"
+            android:title="@string/settings_api_title"
             app:iconSpaceReserved="false"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            app:useSimpleSummaryProvider="true"
-            android:title="Custom API address" />
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            android:key="webui"
+            android:title="@string/settings_webui_title"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
-        android:title="Power settings">
+        android:title="@string/settings_category_power">
 
         <SwitchPreference
             android:key="lowpower"
-            android:title="Low power"
-            android:summary="Reduces daemon overhead on the system. May affect node functionality - performance of content discovery and data fetching may be degraded."
-            app:iconSpaceReserved="false"
-            android:defaultValue="false" />
+            android:title="@string/settings_lowpower_title"
+            android:defaultValue="false"
+            android:summary="@string/settings_lowpower_summary"
+            app:iconSpaceReserved="false" />
 
         <SeekBarPreference
-            android:defaultValue="1"
-            android:max="60"
-            android:title="Monitoring interval"
-            android:summary="Seconds to wait between each request"
             android:key="interval"
-            app:iconSpaceReserved="false"
+            android:title="@string/settings_interval_title"
+            android:defaultValue="1"
+            android:summary="@string/settings_interval_summary"
+            android:max="60"
             app:min="1"
-            app:showSeekBarValue="true" />
+            app:showSeekBarValue="true"
+            app:iconSpaceReserved="false" />
 
     </PreferenceCategory>
 

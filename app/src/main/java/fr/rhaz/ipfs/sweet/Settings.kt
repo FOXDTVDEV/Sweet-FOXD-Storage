@@ -67,7 +67,7 @@ class Settings : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChange
 
                     Toast.makeText(
                         this@Settings,
-                        "Please restart your node to apply changes",
+                        R.string.settings_restart_required,
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -89,14 +89,14 @@ class Settings : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChange
                 JSONObject(monitor.post("version")).getString("Version")
             }
 
-            info.text = "Connected to v$version"
+            info.text = String.format(getString(R.string.settings_state_connected), version)
             info.setTextColor(getColor(R.color.colorAccent))
 
             settings.preferenceScreen.apply {
                 findPreference<SwitchPreference>("lowpower")?.isEnabled = true
             }
         } catch (e: Exception) {
-            info.text = "Not connected"
+            info.text = getString(R.string.settings_state_disconnected)
             info.setTextColor(getColor(android.R.color.holo_red_light))
 
             settings.preferenceScreen.apply {

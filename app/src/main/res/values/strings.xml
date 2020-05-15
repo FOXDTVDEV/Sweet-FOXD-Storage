@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Sweet IPFS</string>
+    <string name="app_name" translatable="false">Sweet IPFS</string>
     <string name="help">
 If you want to install an IPFS node, you can install the Termux app and execute the following commands:\n
 pkg install ipfs\n
@@ -9,4 +9,27 @@ This will install and initialize a new IPFS node.\n
 You can then start it using the following command:\n
 ipfs daemon\n
     </string>
+    <string name="settings_api_title">Custom API address</string>
+    <string name="settings_webui_title">Custom WebUI address</string>
+    <string name="settings_lowpower_title">Low power mode</string>
+    <string name="settings_lowpower_summary">Reduces daemon overhead on the system. May affect node functionality - performance of content discovery and data fetching may be degraded.</string>
+    <string name="settings_interval_title">Monitoring interval</string>
+    <string name="settings_interval_summary">Seconds to wait between each request</string>
+    <string name="settings_category_connection">Connection settings</string>
+    <string name="settings_category_power">Power settings</string>
+    <string name="process_text">Open with Sweet IPFS</string>
+    <string name="settings_state_connected">Connected to go-ipfs v%1$s</string>
+    <string name="settings_state_disconnected">Not connected</string>
+    <string name="settings_restart_required">"Please restart your node to apply changes"</string>
+    <string name="notification_sub">Monitoring</string>
+    <string name="notification_title_paused">Paused</string>
+    <string name="notification_content_paused">Monitoring is paused</string>
+    <string name="notification_action_resume">Resume</string>
+    <string name="notification_action_settings">Settings</string>
+    <string name="notification_action_pause">Pause</string>
+    <string name="notification_title_connected">Connected</string>
+    <string name="notification_content_connected">v%1$s • %2$s peers • %3$s / %4$s Mbps</string>
+    <string name="notification_title_disconnected">Not connected</string>
+    <string name="notification_content_disconnected">Tap here to open the settings</string>
+    <string name="notification_title_error">An error occurred</string>
 </resources>

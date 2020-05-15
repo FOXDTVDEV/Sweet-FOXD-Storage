@@ -3,6 +3,7 @@ package fr.rhaz.ipfs.sweet
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_PROCESS_TEXT
 import android.content.Intent.ACTION_SEND
 import android.content.ServiceConnection
 import android.os.Bundle
@@ -44,19 +45,29 @@ class Share : AppCompatActivity() {
         return response.getString("Hash")
     }
 
-    fun onMonitorConnected(monitor: Monitor) = GlobalScope.launch(Main) {
-        try {
-            when (intent?.action) {
-                ACTION_SEND -> when (intent?.type) {
-                    "text/plain" -> {
-                        val text = intent.getStringExtra(Intent.EXTRA_TEXT)!!
-                        val hash = withContext(IO) { monitor.add(text) }
-                        monitor.open("#/pins/$hash")
-                    }
+    suspend fun Monitor.handle() {
+        when (intent?.action) {
+            ACTION_SEND -> when (intent?.type) {
+                "text/plain" -> {
+                    val text = intent.getStringExtra(Intent.EXTRA_TEXT)!!
+                    val hash = withContext(IO) { add(text) }
+                    open("#/ipfs/$hash")
                 }
             }
+            ACTION_PROCESS_TEXT -> when (intent?.type) {
+                "text/plain" -> {
+                    val text = intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT)!!
+                    open("#/ipfs/$text")
+                }
+            }
+        }
+    }
+
+    fun onMonitorConnected(monitor: Monitor) = GlobalScope.launch(Main) {
+        try {
+            monitor.handle()
         } catch (e: Exception) {
-            println(e.message)
+            println(e)
             Toast.makeText(this@Share, e.message, Toast.LENGTH_LONG).show()
         } finally {
             finish()

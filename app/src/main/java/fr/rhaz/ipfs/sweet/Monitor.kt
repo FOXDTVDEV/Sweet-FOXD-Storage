@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.util.*
 
-fun String?.or(other: String) = if (isNullOrBlank()) other else this
+operator fun Uri.plus(it: String): Uri = Uri.withAppendedPath(this, it)
 
 class Monitor : Service() {
 
@@ -28,8 +28,21 @@ class Monitor : Service() {
         PreferenceManager.getDefaultSharedPreferences(this)
     }
 
-    val API get() = Uri.parse(preferences.getString("api", null).or("http://127.0.0.1:5001"))
     val interval get() = preferences.getInt("interval", 1)
+
+    val API: Uri
+        get() {
+            var api = preferences.getString("api", null)
+            if (api.isNullOrBlank()) api = "http://127.0.0.1:5001"
+            return Uri.parse(api)
+        }
+
+    val WebUI: Uri
+        get() {
+            val webui = preferences.getString("webui", null)
+            if (webui.isNullOrBlank()) return API + "webui"
+            return Uri.parse(webui)
+        }
 
     var paused = false
 
@@ -63,7 +76,7 @@ class Monitor : Service() {
     }
 
     fun open(path: String = "") {
-        val uri = Uri.withAppendedPath(API, "webui/$path")
+        val uri = WebUI + path
 
         val intent = CustomTabsIntent.Builder()
             .setToolbarColor(getColor(R.color.colorPrimaryDark))
@@ -95,7 +108,7 @@ class Monitor : Service() {
         return id
     }
 
-    fun pathOf(path: String) = Uri.withAppendedPath(API, "api/v0/$path").toString()
+    fun pathOf(path: String) = (API + "api/v0/$path").toString()
 
     suspend fun post(path: String, parameters: Parameters? = null) =
         Fuel.post(pathOf(path), parameters).awaitString()
@@ -109,11 +122,19 @@ class Monitor : Service() {
             .setShowWhen(false)
             .setSmallIcon(R.drawable.ic_notification)
             .setColor(getColor(R.color.colorAccent))
-            .setSubText("Monitoring")
-            .setContentTitle("Paused")
-            .setContentText("Monitoring is paused")
-            .addAction(R.drawable.ic_notification, "Resume", intent("start"))
-            .addAction(R.drawable.ic_notification, "Settings", intent("settings"))
+            .setSubText(getString(R.string.notification_sub))
+            .setContentTitle(getString(R.string.notification_title_paused))
+            .setContentText(getString(R.string.notification_content_paused))
+            .addAction(
+                R.drawable.ic_notification,
+                getString(R.string.notification_action_resume),
+                intent("start")
+            )
+            .addAction(
+                R.drawable.ic_notification,
+                getString(R.string.notification_action_settings),
+                intent("settings")
+            )
 
         startForeground(1, notification.build())
     }
@@ -141,8 +162,16 @@ class Monitor : Service() {
             .setSubText("Monitoring")
             .setSmallIcon(R.drawable.ic_notification)
             .setColor(getColor(R.color.colorAccent))
-            .addAction(R.drawable.ic_notification, "Pause", intent("pause"))
-            .addAction(R.drawable.ic_notification, "Settings", intent("settings"))
+            .addAction(
+                R.drawable.ic_notification,
+                getString(R.string.notification_action_pause),
+                intent("pause")
+            )
+            .addAction(
+                R.drawable.ic_notification,
+                getString(R.string.notification_action_settings),
+                intent("settings")
+            )
 
         try {
             val (version, peers, ratein, rateout) = withContext(IO) {
@@ -154,21 +183,23 @@ class Monitor : Service() {
                 listOf(version, peers, ratein, rateout)
             }
 
+            val content = getString(R.string.notification_content_connected)
+
             notification
-                .setContentTitle("Connected")
-                .setContentText("v$version • $peers peers • $ratein / $rateout Mbps")
+                .setContentTitle(getString(R.string.notification_title_connected))
+                .setContentText(String.format(content, version, peers, ratein, rateout))
                 .setContentIntent(intent("open"))
 
         } catch (e: FuelError) {
             println(e.message)
             notification
-                .setContentTitle("Not connected")
-                .setContentText("Tap to open settings")
+                .setContentTitle(getString(R.string.notification_title_disconnected))
+                .setContentText(getString(R.string.notification_content_disconnected))
                 .setContentIntent(intent("settings"))
         } catch (e: Exception) {
             println(e.message)
             notification
-                .setContentTitle("An error occured")
+                .setContentTitle(getString(R.string.notification_title_error))
                 .setContentText(e.message)
         }
 
